@@ -1,0 +1,33 @@
+{
+  "common": {
+    "appName": "Zezet ERP",
+    "tagline": "Fleet operations, all in one place.",
+    "signIn": "Sign in",
+    "username": "Username",
+    "password": "Password"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "enterTrips": "Enter trips",
+    "allTrips": "All trips",
+    "trucks": "Trucks",
+    "people": "People",
+    "clientsPrices": "Clients & prices",
+    "reports": "Reports",
+    "settings": "Settings"
+  },
+  "tripEntry": {
+    "title": "Enter trips",
+    "client": "Client",
+    "route": "Route",
+    "driver": "Driver",
+    "helper": "Helper",
+    "fuel": "Fuel",
+    "odometer": "Odometer",
+    "addTrip": "Add another trip",
+    "saveForLater": "Save for later",
+    "done": "Done",
+    "notYet": "Not yet",
+    "checkThis": "check this"
+  }
+}

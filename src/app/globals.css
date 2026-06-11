@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+/* ============================================================
+   Zezet ERP — design tokens (v4 "Fleet Blue", locked)
+   Source of truth: design/BRAND.md + design/wireframes-v4/styles.css
+   ============================================================ */
+
+:root {
+  --bg: #eef0f4;          /* app canvas */
+  --surface: #ffffff;     /* cards */
+  --soft: #f3f5f9;        /* field fills, table headers, hover */
+  --side-bg: #15171f;     /* deep-ink sidebar */
+  --ink: #16161e;
+  --muted: #71768a;
+  --faint: #a2a7b8;
+  --line: #dfe2ea;
+  --line-2: #cdd2de;
+  --blue: #3d52e0;
+  --blue-700: #2e40c4;
+  --blue-bright: #4d6bff;
+  --peri: #edeffb;        /* active nav tint, info pills, avatars */
+  --ok: #27b07a;          --ok-bg: #e7f6ef;
+  --warn: #e8973a;        --warn-bg: #fcf2e5;
+  --bad: #ee4e63;         --bad-bg: #fdeaed;  /* "check" / error / negative delta */
+  --radius: 5px;          /* crisp, not bubbly */
+}
+
+/* Expose tokens to Tailwind v4 utilities (bg-surface, text-muted, rounded-base, …) */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-soft: var(--soft);
+  --color-side: var(--side-bg);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-line: var(--line);
+  --color-line-2: var(--line-2);
+  --color-blue: var(--blue);
+  --color-blue-700: var(--blue-700);
+  --color-blue-bright: var(--blue-bright);
+  --color-peri: var(--peri);
+  --color-ok: var(--ok);
+  --color-ok-bg: var(--ok-bg);
+  --color-warn: var(--warn);
+  --color-warn-bg: var(--warn-bg);
+  --color-bad: var(--bad);
+  --color-bad-bg: var(--bad-bg);
+  --radius-base: var(--radius);
+  --font-sans: var(--font-mulish), ui-sans-serif, system-ui, sans-serif;
+}
+
+html, body {
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 13px;          /* compact, ERP density */
+  line-height: 1.45;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; }
+}

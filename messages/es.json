@@ -1,0 +1,33 @@
+{
+  "common": {
+    "appName": "Zezet ERP",
+    "tagline": "Operaciones de flota, todo en un solo lugar.",
+    "signIn": "Iniciar sesión",
+    "username": "Usuario",
+    "password": "Contraseña"
+  },
+  "nav": {
+    "dashboard": "Inicio",
+    "enterTrips": "Registrar viajes",
+    "allTrips": "Todos los viajes",
+    "trucks": "Camiones",
+    "people": "Personal",
+    "clientsPrices": "Clientes y precios",
+    "reports": "Reportes",
+    "settings": "Ajustes"
+  },
+  "tripEntry": {
+    "title": "Registrar viajes",
+    "client": "Cliente",
+    "route": "Ruta",
+    "driver": "Conductor",
+    "helper": "Ayudante",
+    "fuel": "Combustible",
+    "odometer": "Kilometraje",
+    "addTrip": "Agregar otro viaje",
+    "saveForLater": "Guardar para después",
+    "done": "Listo",
+    "notYet": "Todavía no",
+    "checkThis": "revisar esto"
+  }
+}
