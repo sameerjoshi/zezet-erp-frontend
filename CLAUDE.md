@@ -69,6 +69,16 @@ Login → app shell (sidebar/topbar, role-gated nav, EN/ES toggle) → **Daily T
 date → trucks → trips with rate-prepopulated-but-editable prices, driver/helper, fuel, odometer) →
 basic role-gated lists/reports. Master-data admin can be minimal/seed-driven at first.
 
+## Working rhythm & handoff (READ THIS)
+Work **one TASKS.md item at a time**: plan briefly → implement → verify (build/run) → tick the box →
+commit. Keep `TASKS.md`, `DEVLOG.md`, and the code in the **same commit**.
+
+**Maintain `DEVLOG.md`** — it's the handoff the planning/review session reads, so comms don't depend on
+chat. After each task (or notable change), add a dated entry at the **top** with: **What changed** ·
+**Decisions / deviations** (anything not obvious from the diff — config, env, trade-offs) ·
+**Gotchas / risks** · **Next** (the next unchecked TASKS.md item). Keep it short and skimmable; this is the
+single place the hub checks to see where the frontend is.
+
 ## Conventions
 - Keep components presentational; data via query hooks. Handle loading/empty/error states explicitly.
 - Accessibility basics (labels, focus, contrast). Validate at the boundary; show friendly messages.
