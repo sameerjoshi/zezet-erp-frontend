@@ -1,30 +1,26 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
-import { me } from '@/lib/api/auth';
+import { useAuth } from '@/lib/auth/useAuth';
 
-// Guards the app area. On mount, loads the profile — the API client will silently
-// refresh via the httpOnly cookie if the in-memory access token is gone (e.g. after
-// a page reload). If that fails, the user isn't signed in → send them to /login.
+// Guards the app area. The shared ['me'] query loads the profile — the API client will
+// silently refresh via the httpOnly cookie if the in-memory access token is gone (e.g.
+// after a page reload). If that fails, the user isn't signed in → send them to /login.
 export function AuthGate({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const [state, setState] = useState<'loading' | 'ok'>('loading');
+  const t = useTranslations('common');
+  const { user, isError } = useAuth();
 
   useEffect(() => {
-    let active = true;
-    me()
-      .then(() => active && setState('ok'))
-      .catch(() => active && router.replace('/login'));
-    return () => {
-      active = false;
-    };
-  }, [router]);
+    if (isError) router.replace('/login');
+  }, [isError, router]);
 
-  if (state !== 'ok') {
+  if (!user) {
     return (
       <div style={{ display: 'grid', placeItems: 'center', minHeight: '100vh', color: 'var(--muted)' }}>
-        Loading…
+        {t('loading')}
       </div>
     );
   }

@@ -5,6 +5,28 @@ Format per entry: **What changed · Decisions/deviations · Gotchas/risks · Nex
 
 ---
 
+## 2026-06-12 · Master-data screens + full i18n pass ✅
+**What changed**
+- New screens (server page + client feature view, mirroring dashboard): `/trucks`, `/people`, `/clients`, `/settings` (Users, admin-only). Each has list + create/edit (modal) + deactivate, with loading/empty/error states.
+- `/clients` is master-detail: selecting a client shows its rate cards + rates with add-rate and close-rate; prices are finance-gated.
+- `useAuth` hook (`src/lib/auth/useAuth.ts`): shared `['me']` TanStack query exposing `roles`, `isAdmin`, `canSeeMoney` (admin/finance/investor). `AuthGate` and `Sidebar` now consume it (single profile fetch; sidebar shows the real user).
+- API helpers: extended `masterdata.ts` (full Truck/Worker/Client CRUD), new `pricing.ts` (rate cards/rates) and `admin.ts` (users/roles).
+- i18n: extracted ALL user-facing strings (login, dashboard, sidebar, topbar, trip-entry, new screens) into `messages/{en,es}.json` under namespaces `common/status/nav/shell/login/dashboard/tripEntry/trucks/people/clients/users`. Spanish uses operator vocabulary (Camiones, Conductor, Ayudante, Kilometraje, Combustible, Cliente, Registrar viajes, Listo, Guardar).
+- Polish: added the missing `.input`, `table`, modal, form-grid and helper classes to `globals.css` (referenced but previously undefined).
+
+**Decisions / deviations**
+- `POST /users` body field is `roles` (per `schema.d.ts`), not `roleKeys` as the brief stated — followed the schema.
+- Finance gating mirrors the backend: money columns/fields hidden unless `canSeeMoney`. Backend still strips the data regardless.
+- Users screen lives at `/settings` (matches the existing sidebar link). Non-admins see an "admins only" notice.
+- Trip-entry touched only for string extraction + one `eslint-disable` on the pre-existing auto-select effect (new React 19 `set-state-in-effect` rule flagged existing code; no logic change).
+
+**Gotchas / risks**
+- Screens are wired against the live API (not exercised this session — backend not running). Money-stripped responses render `—`.
+- Topbar "last updated" is now `new Date()` with `suppressHydrationWarning` (SSG build-time vs client).
+
+**Next**
+- `/trips` (all trips) and `/reports` still 404.
+
 ## 2026-06-12 · App shell + dashboard (visible) ✅
 **What changed**
 - Ported the locked v4 component CSS into `src/app/globals.css` (sidebar, topbar, KPI, cards, donuts, segbar, cells, pills).

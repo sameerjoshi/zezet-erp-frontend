@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getClients, getWorkers } from '@/lib/api/masterdata';
 import {
@@ -18,6 +19,8 @@ const todayStr = () => new Date().toISOString().slice(0, 10);
 const num = (s: string) => (s.trim() === '' ? undefined : Number(s));
 
 export function TripEntryView() {
+  const tr = useTranslations('tripEntry');
+  const ts = useTranslations('status');
   const qc = useQueryClient();
   const [date, setDate] = useState(todayStr());
   const [truckId, setTruckId] = useState<string | null>(null);
@@ -28,6 +31,7 @@ export function TripEntryView() {
 
   // auto-select first truck when the day loads
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional one-shot auto-select
     if (!truckId && summary.data?.trucks.length) setTruckId(summary.data.trucks[0].truckId);
   }, [summary.data, truckId]);
 
@@ -91,7 +95,7 @@ export function TripEntryView() {
           <button className="btn ghost sm" onClick={() => stepDate(1)}>▶</button>
           {counts && (
             <span className="pill info" style={{ marginLeft: 8 }}>
-              {counts.confirmed + counts.draft} of {counts.trucks} trucks entered
+              {tr('trucksEntered', { entered: counts.confirmed + counts.draft, total: counts.trucks })}
             </span>
           )}
         </div>
@@ -124,12 +128,12 @@ export function TripEntryView() {
       {/* Selected truck panel */}
       {truckId && (
         <div className="card">
-          {log.isLoading && <div className="bd helper">Loading…</div>}
+          {log.isLoading && <div className="bd helper">{tr('loading')}</div>}
           {detail && (
             <>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '13px 18px', borderBottom: '1px solid var(--line)', flexWrap: 'wrap' }}>
                 <b style={{ fontSize: 16 }}>{summary.data?.trucks.find((t) => t.truckId === truckId)?.truckCode}</b>
-                <span className={`pill ${detail.status === 'confirmed' ? 'ok' : 'warn'}`}>{detail.status}</span>
+                <span className={`pill ${detail.status === 'confirmed' ? 'ok' : 'warn'}`}>{ts(detail.status)}</span>
                 <div className="spacer" />
                 <FuelOdometer detail={detail} onSave={(b) => saveLog.mutate(b)} saving={saveLog.isPending} />
               </div>
@@ -143,8 +147,8 @@ export function TripEntryView() {
               <table>
                 <thead>
                   <tr>
-                    <th style={{ width: 34 }}>#</th><th>Client</th><th>Route</th><th>Driver</th><th>Helper</th>
-                    <th style={{ width: 90 }}>Charge</th><th style={{ width: 90 }}>Driver $</th><th style={{ width: 90 }}>Helper $</th><th style={{ width: 40 }}></th>
+                    <th style={{ width: 34 }}>#</th><th>{tr('client')}</th><th>{tr('route')}</th><th>{tr('driver')}</th><th>{tr('helper')}</th>
+                    <th style={{ width: 90 }}>{tr('charge')}</th><th style={{ width: 90 }}>{tr('driverPay')}</th><th style={{ width: 90 }}>{tr('helperPay')}</th><th style={{ width: 40 }}></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -159,12 +163,12 @@ export function TripEntryView() {
                       <td className="tnum">{t.driverPay ?? '🔒'}</td>
                       <td className="tnum">{t.helperPay ?? '🔒'}</td>
                       <td>
-                        <button className="btn ghost sm" onClick={() => removeTrip.mutate(t.id)} title="Remove trip">✕</button>
+                        <button className="btn ghost sm" onClick={() => removeTrip.mutate(t.id)} title={tr('removeTrip')}>✕</button>
                       </td>
                     </tr>
                   ))}
                   {detail.trips.length === 0 && (
-                    <tr><td colSpan={9} className="helper" style={{ padding: 16 }}>No trips yet — add the first one below.</td></tr>
+                    <tr><td colSpan={9} className="helper" style={{ padding: 16 }}>{tr('noTripsYet')}</td></tr>
                   )}
                 </tbody>
               </table>
@@ -178,13 +182,13 @@ export function TripEntryView() {
               />
 
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 18px', borderTop: '1px solid var(--line)', background: '#FBFBFD', flexWrap: 'wrap' }}>
-                <span className="helper">No cap on trips per day. Warnings never block saving.</span>
+                <span className="helper">{tr('noCapNote')}</span>
                 <div className="spacer" />
                 {detail.totals && (
-                  <span className="helper">Day total: <b>{detail.totals.billAmount}</b> charge · <b>{detail.totals.driverPay}</b> driver pay</span>
+                  <span className="helper">{tr('dayTotal')} <b>{detail.totals.billAmount}</b> {tr('chargeWord')} · <b>{detail.totals.driverPay}</b> {tr('driverPayWord')}</span>
                 )}
                 <button className="btn" disabled={confirm.isPending || detail.status === 'confirmed'} onClick={() => confirm.mutate()}>
-                  {detail.status === 'confirmed' ? 'Confirmed ✓' : confirm.isPending ? 'Confirming…' : 'Confirm ✓'}
+                  {detail.status === 'confirmed' ? `${tr('confirmed')} ✓` : confirm.isPending ? tr('confirming') : `${tr('confirm')} ✓`}
                 </button>
               </div>
             </>
@@ -204,23 +208,25 @@ function FuelOdometer({
   onSave: (b: { fuelCost?: number; odometerStart?: number; odometerEnd?: number }) => void;
   saving: boolean;
 }) {
+  const tr = useTranslations('tripEntry');
+  const tc = useTranslations('common');
   const [fuel, setFuel] = useState(detail.fuelCost ?? '');
   const [odoStart, setOdoStart] = useState(detail.odometerStart?.toString() ?? '');
   const [odoEnd, setOdoEnd] = useState(detail.odometerEnd?.toString() ?? '');
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-      <label className="helper" style={{ fontWeight: 700 }}>Fuel $</label>
+      <label className="helper" style={{ fontWeight: 700 }}>{tr('fuel')}</label>
       <input className="input" style={{ width: 80 }} value={fuel} onChange={(e) => setFuel(e.target.value)} />
-      <label className="helper" style={{ fontWeight: 700 }}>Odo start</label>
+      <label className="helper" style={{ fontWeight: 700 }}>{tr('odoStart')}</label>
       <input className="input" style={{ width: 90 }} value={odoStart} onChange={(e) => setOdoStart(e.target.value)} />
-      <label className="helper" style={{ fontWeight: 700 }}>Odo end</label>
+      <label className="helper" style={{ fontWeight: 700 }}>{tr('odoEnd')}</label>
       <input className="input" style={{ width: 90 }} value={odoEnd} onChange={(e) => setOdoEnd(e.target.value)} />
       <button
         className="btn ghost sm"
         disabled={saving}
         onClick={() => onSave({ fuelCost: num(fuel), odometerStart: num(odoStart), odometerEnd: num(odoEnd) })}
       >
-        {saving ? 'Saving…' : 'Save'}
+        {saving ? tc('saving') : tc('save')}
       </button>
     </div>
   );
@@ -239,6 +245,8 @@ function AddTripRow({
   onAdd: (b: CreateTripInput) => void;
   adding: boolean;
 }) {
+  const tr = useTranslations('tripEntry');
+  const tc = useTranslations('common');
   const [clientId, setClientId] = useState('');
   const [routeLabel, setRouteLabel] = useState('');
   const [driverWorkerId, setDriverWorkerId] = useState('');
@@ -272,20 +280,20 @@ function AddTripRow({
       <div style={{ ...cell, textAlign: 'center', fontWeight: 700, color: 'var(--blue)' }}>＋</div>
       <div style={cell}>
         <select className="input" value={clientId} onChange={(e) => onClient(e.target.value)}>
-          <option value="">Client…</option>
+          <option value="">{tr('clientPlaceholder')}</option>
           {clients.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
       </div>
-      <div style={cell}><input className="input" placeholder="Route" value={routeLabel} onChange={(e) => setRouteLabel(e.target.value)} /></div>
+      <div style={cell}><input className="input" placeholder={tr('route')} value={routeLabel} onChange={(e) => setRouteLabel(e.target.value)} /></div>
       <div style={cell}>
         <select className="input" value={driverWorkerId} onChange={(e) => setDriverWorkerId(e.target.value)}>
-          <option value="">Driver…</option>
+          <option value="">{tr('driverPlaceholder')}</option>
           {drivers.map((w) => <option key={w.id} value={w.id}>{w.fullName}</option>)}
         </select>
       </div>
       <div style={cell}>
         <select className="input" value={helperWorkerId} onChange={(e) => setHelperWorkerId(e.target.value)}>
-          <option value="">— no helper —</option>
+          <option value="">{tr('noHelper')}</option>
           {helpers.map((w) => <option key={w.id} value={w.id}>{w.fullName}</option>)}
         </select>
       </div>
@@ -309,7 +317,7 @@ function AddTripRow({
             reset();
           }}
         >
-          Add
+          {tc('add')}
         </button>
       </div>
     </div>

@@ -1,10 +1,12 @@
 'use client';
 
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { usePathname, useRouter } from '@/i18n/navigation';
 
 export function Topbar({ title }: { title: string }) {
   const locale = useLocale();
+  const t = useTranslations('common');
+  const ts = useTranslations('shell');
   const router = useRouter();
   const pathname = usePathname();
 
@@ -12,10 +14,12 @@ export function Topbar({ title }: { title: string }) {
     if (next !== locale) router.replace(pathname, { locale: next });
   };
 
+  const updated = new Date().toLocaleDateString(locale === 'es' ? 'es-PA' : 'en-GB');
+
   return (
     <header className="topbar">
       <span className="upd">
-        Last updated: <b>12/06/2026</b>
+        {ts('lastUpdated')}: <b suppressHydrationWarning>{updated}</b>
       </span>
       <h1 style={{ font: '900 18px var(--font)', margin: 0 }}>{title}</h1>
       <div className="spacer" />
@@ -25,7 +29,7 @@ export function Topbar({ title }: { title: string }) {
           <circle cx="11" cy="11" r="7" />
           <path d="m21 21-4-4" />
         </svg>
-        <input placeholder="Search" />
+        <input placeholder={t('search')} />
       </div>
 
       <button className="iconbtn" aria-label="Notifications">

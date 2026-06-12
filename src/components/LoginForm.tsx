@@ -8,6 +8,7 @@ import { ApiError } from '@/lib/api/client';
 
 export function LoginForm() {
   const t = useTranslations('common');
+  const tl = useTranslations('login');
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
@@ -29,15 +30,7 @@ export function LoginForm() {
       router.replace('/dashboard');
     } catch (err) {
       const badCreds = err instanceof ApiError && err.status === 401;
-      setError(
-        badCreds
-          ? locale === 'es'
-            ? 'Usuario o contraseña incorrectos.'
-            : 'Wrong username or password.'
-          : locale === 'es'
-            ? 'No se pudo iniciar sesión. Inténtalo de nuevo.'
-            : 'Could not sign in. Please try again.',
-      );
+      setError(badCreds ? tl('wrongCreds') : tl('failed'));
     } finally {
       setBusy(false);
     }
@@ -51,11 +44,11 @@ export function LoginForm() {
         </div>
         <div>
           <h2>{t('tagline')}</h2>
-          <p>Trips, drivers, fuel and billing for the whole fleet — simple enough to use every night.</p>
+          <p>{tl('promo')}</p>
           <div className="mini">
-            <div className="r"><span style={{ opacity: 0.85 }}>Trucks out today</span><b>28 / 38</b></div>
-            <div className="r"><span style={{ opacity: 0.85 }}>Trips logged</span><b>31</b></div>
-            <div className="r"><span style={{ opacity: 0.85 }}>Fleet in use</span><b>81%</b></div>
+            <div className="r"><span style={{ opacity: 0.85 }}>{tl('trucksOut')}</span><b>28 / 38</b></div>
+            <div className="r"><span style={{ opacity: 0.85 }}>{tl('tripsLogged')}</span><b>31</b></div>
+            <div className="r"><span style={{ opacity: 0.85 }}>{tl('fleetInUse')}</span><b>81%</b></div>
           </div>
         </div>
         <div style={{ fontSize: 12, opacity: 0.7 }}>zezet.net · Panamá</div>
@@ -65,15 +58,11 @@ export function LoginForm() {
         <form className="box" onSubmit={onSubmit}>
           <h3>{t('signIn')}</h3>
           <p className="muted" style={{ margin: '0 0 12px' }}>
-            {locale === 'es'
-              ? 'Inicia sesión con el usuario que te dieron.'
-              : 'Sign in with the username your admin gave you.'}
+            {tl('subtitle')}
           </p>
 
           <div className="field">
-            <label>
-              {t('username')} <span className="es">· {locale === 'es' ? 'Usuario' : 'Usuario'}</span>
-            </label>
+            <label>{t('username')}</label>
             <input
               className="input"
               placeholder="m.gomez"
@@ -119,25 +108,21 @@ export function LoginForm() {
             disabled={busy}
             style={{ width: '100%', justifyContent: 'center', padding: 12, opacity: busy ? 0.7 : 1 }}
           >
-            {busy ? (locale === 'es' ? 'Entrando…' : 'Signing in…') : t('signIn')}
+            {busy ? tl('signingIn') : t('signIn')}
           </button>
 
           <div className="note" style={{ marginTop: 18 }}>
             <span>ℹ️</span>
-            <span>
-              {locale === 'es'
-                ? 'No necesitas correo — la cuenta usa un usuario. Correo y teléfono son opcionales.'
-                : 'No email needed — accounts use a simple username. Email & phone are optional.'}
-            </span>
+            <span>{tl('noEmailNote')}</span>
           </div>
 
           <div style={{ textAlign: 'center', marginTop: 18 }}>
             <span className="lang">
               <button type="button" className={locale === 'en' ? 'on' : ''} onClick={() => setLocale('en')}>
-                English
+                {tl('english')}
               </button>
               <button type="button" className={locale === 'es' ? 'on' : ''} onClick={() => setLocale('es')}>
-                Español
+                {tl('spanish')}
               </button>
             </span>
           </div>

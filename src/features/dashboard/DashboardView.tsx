@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import { getSummary, type TruckStatus } from '@/lib/api/operations';
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -12,6 +13,7 @@ const cellClass: Record<TruckStatus, string> = {
 };
 
 export function DashboardView() {
+  const t = useTranslations('dashboard');
   const date = today();
   const { data, isLoading, isError } = useQuery({
     queryKey: ['ops-summary', date],
@@ -36,7 +38,7 @@ export function DashboardView() {
             </svg>
           </span>
           <div className="m">
-            <div className="l">Trucks entered</div>
+            <div className="l">{t('trucksEntered')}</div>
             <div className="v">
               {entered ?? '—'}{' '}
               <span className="muted" style={{ fontSize: 14 }}>/{counts?.trucks ?? '—'}</span>
@@ -51,7 +53,7 @@ export function DashboardView() {
             </svg>
           </span>
           <div className="m">
-            <div className="l">Trips today</div>
+            <div className="l">{t('tripsToday')}</div>
             <div className="v">{data ? data.trucks.reduce((s, t) => s + t.tripCount, 0) : '—'}</div>
           </div>
         </div>
@@ -63,7 +65,7 @@ export function DashboardView() {
             </svg>
           </span>
           <div className="m">
-            <div className="l">Fleet in use</div>
+            <div className="l">{t('fleetInUse')}</div>
             <div className="v">{counts ? `${pct(counts.confirmed + counts.draft)}%` : '—'}</div>
           </div>
         </div>
@@ -75,7 +77,7 @@ export function DashboardView() {
             </svg>
           </span>
           <div className="m">
-            <div className="l">Pending entry 🔒</div>
+            <div className="l">{t('pendingEntry')} 🔒</div>
             <div className="v">{counts?.none ?? '—'}</div>
           </div>
         </div>
@@ -85,13 +87,13 @@ export function DashboardView() {
       <div className="card reveal d3" style={{ marginTop: 14 }}>
         <div className="bd">
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 14 }}>
-            <h2 style={{ font: '800 16px var(--font)', margin: 0 }}>Fleet status — today</h2>
+            <h2 style={{ font: '800 16px var(--font)', margin: 0 }}>{t('fleetStatusToday')}</h2>
             <div className="spacer" />
-            <span className="helper">{counts ? `${counts.trucks} trucks` : ''}</span>
+            <span className="helper">{counts ? t('trucksCount', { count: counts.trucks }) : ''}</span>
           </div>
 
-          {isLoading && <p className="helper">Loading fleet…</p>}
-          {isError && <p className="helper" style={{ color: 'var(--bad)' }}>Could not load fleet status.</p>}
+          {isLoading && <p className="helper">{t('loadingFleet')}</p>}
+          {isError && <p className="helper" style={{ color: 'var(--bad)' }}>{t('loadError')}</p>}
 
           {data && (
             <>
@@ -107,9 +109,9 @@ export function DashboardView() {
                 </div>
               </div>
               <div className="legrow">
-                <span className="li"><span className="sw" style={{ background: 'var(--ok-bg)', borderColor: '#BFE8D4' }} /> Confirmed</span>
-                <span className="li"><span className="sw" style={{ background: '#E9EDFF', borderColor: '#C5D0FF' }} /> Draft</span>
-                <span className="li"><span className="sw" style={{ background: '#fff' }} /> Not yet</span>
+                <span className="li"><span className="sw" style={{ background: 'var(--ok-bg)', borderColor: '#BFE8D4' }} /> {t('confirmed')}</span>
+                <span className="li"><span className="sw" style={{ background: '#E9EDFF', borderColor: '#C5D0FF' }} /> {t('draft')}</span>
+                <span className="li"><span className="sw" style={{ background: '#fff' }} /> {t('notYet')}</span>
               </div>
               <div className="cellgrid" style={{ marginTop: 14 }}>
                 {data.trucks.map((t) => (

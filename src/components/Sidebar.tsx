@@ -2,20 +2,30 @@
 
 import { useTranslations } from 'next-intl';
 import { Link, usePathname, useRouter } from '@/i18n/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import { logout } from '@/lib/api/auth';
+import { useAuth } from '@/lib/auth/useAuth';
 
 type Item = { href: string; label: string; icon: ReactNode; lock?: boolean };
 
 export function Sidebar() {
   const t = useTranslations('nav');
+  const ts = useTranslations('shell');
   const pathname = usePathname();
   const router = useRouter();
+  const qc = useQueryClient();
+  const { user, roles } = useAuth();
 
   const onSignOut = async () => {
     await logout();
+    qc.removeQueries({ queryKey: ['me'] });
     router.replace('/login');
   };
+
+  const username = user?.username ?? '';
+  const initials = username.slice(0, 2).toUpperCase() || '··';
+  const roleLabel = roles[0] ?? ts('owner');
 
   const items: Item[] = [
     { href: '/dashboard', label: t('dashboard'), icon: I.grid },
@@ -56,14 +66,14 @@ export function Sidebar() {
 
       <div className="sep" />
       <div className="me">
-        <span className="ph">XV</span>
+        <span className="ph">{initials}</span>
         <div>
-          <b>Xavier V.</b>
-          <small>Owner</small>
+          <b>{username}</b>
+          <small>{roleLabel}</small>
         </div>
       </div>
       <button className="signout" onClick={onSignOut}>
-        {I.out} Sign out
+        {I.out} {ts('signOut')}
       </button>
     </aside>
   );
