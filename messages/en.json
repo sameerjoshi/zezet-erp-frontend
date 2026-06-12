@@ -182,5 +182,27 @@
     "editRoles": "Edit roles",
     "atLeastOneRole": "Pick at least one role.",
     "pickRoles": "Choose which roles this person has."
+  },
+  "reports": {
+    "financeOnly": "Reports are available to owner and finance roles only.",
+    "from": "From",
+    "to": "To",
+    "tabTrips": "Trips",
+    "tabUtilization": "Utilization",
+    "tabWorkerPay": "Worker pay",
+    "tabClientBillables": "Client billables",
+    "totalTrips": "trips",
+    "truck": "Truck",
+    "trips": "Trips",
+    "date": "Date",
+    "trucksWithTrips": "Trucks with trips",
+    "utilization": "Utilization",
+    "worker": "Worker",
+    "driverPay": "Driver pay",
+    "helperPay": "Helper pay",
+    "total": "Total",
+    "client": "Client",
+    "billable": "Billable",
+    "noData": "No data for this range."
   }
 }

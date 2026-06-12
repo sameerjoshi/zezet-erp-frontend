@@ -529,6 +529,74 @@ export interface paths {
         patch: operations["OperationsController_updateTrip"];
         trace?: never;
     };
+    "/reports/trips": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Trip counts per day and per truck for a range */
+        get: operations["ReportingController_trips"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reports/utilization": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Active-truck utilization per day for a range */
+        get: operations["ReportingController_utilization"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reports/worker-pay": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Total driver + helper pay per worker (financial) */
+        get: operations["ReportingController_workerPay"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reports/client-billables": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Total billable per client (financial) */
+        get: operations["ReportingController_clientBillables"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1113,6 +1181,87 @@ export interface components {
             /** @description Explicit rate to apply. When omitted, the effective rate is resolved from clientId + routeLabel. */
             rateId?: string;
         };
+        DayTripCountDto: {
+            /**
+             * Format: date
+             * @example 2026-06-12
+             */
+            date: string;
+            /** @example 7 */
+            tripCount: number;
+        };
+        TruckTripCountDto: {
+            truckId: string;
+            /** @example Camión 7 */
+            truckCode: string;
+            /** @example 12 */
+            tripCount: number;
+        };
+        TripsReportResponseDto: {
+            /** Format: date */
+            from: string;
+            /** Format: date */
+            to: string;
+            /** @description Total trips in the range. */
+            totalTrips: number;
+            perDay: components["schemas"]["DayTripCountDto"][];
+            perTruck: components["schemas"]["TruckTripCountDto"][];
+        };
+        DayUtilizationDto: {
+            /**
+             * Format: date
+             * @example 2026-06-12
+             */
+            date: string;
+            /** @description Active trucks in the fleet (current status). */
+            activeTrucks: number;
+            /** @description Distinct active trucks with ≥1 trip that day. */
+            trucksWithTrips: number;
+            /**
+             * @description trucksWithTrips ÷ activeTrucks (0..1, 4-dp). 0 if no trucks.
+             * @example 0.75
+             */
+            utilization: number;
+        };
+        UtilizationReportResponseDto: {
+            /** Format: date */
+            from: string;
+            /** Format: date */
+            to: string;
+            perDay: components["schemas"]["DayUtilizationDto"][];
+        };
+        WorkerPayDto: {
+            workerId: string;
+            workerName: string;
+            /** @description Sum of driverPay on trips driven (financial). */
+            driverPay: string;
+            /** @description Sum of helperPay on trips helped (financial). */
+            helperPay: string;
+            /** @description driverPay + helperPay (financial). */
+            totalPay: string;
+        };
+        WorkerPayReportResponseDto: {
+            /** Format: date */
+            from: string;
+            /** Format: date */
+            to: string;
+            workers: components["schemas"]["WorkerPayDto"][];
+        };
+        ClientBillableDto: {
+            clientId: string;
+            clientName: string;
+            /** @description Trips billed to this client in the range. */
+            tripCount: number;
+            /** @description Sum of billAmount (financial). */
+            billAmount: string;
+        };
+        ClientBillablesReportResponseDto: {
+            /** Format: date */
+            from: string;
+            /** Format: date */
+            to: string;
+            clients: components["schemas"]["ClientBillableDto"][];
+        };
     };
     responses: never;
     parameters: never;
@@ -1167,6 +1316,13 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     AuthController_refresh: {
@@ -1188,6 +1344,13 @@ export interface operations {
             };
             /** @description Refresh cookie missing, invalid, or revoked */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Rate limit exceeded */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2350,6 +2513,130 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TripResponseDto"];
+                };
+            };
+            /** @description Insufficient permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ReportingController_trips: {
+        parameters: {
+            query?: {
+                /** @description Inclusive start date. Defaults to (to − 29 days). */
+                from?: string;
+                /** @description Inclusive end date. Defaults to today (UTC). */
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TripsReportResponseDto"];
+                };
+            };
+            /** @description Insufficient permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ReportingController_utilization: {
+        parameters: {
+            query?: {
+                /** @description Inclusive start date. Defaults to (to − 29 days). */
+                from?: string;
+                /** @description Inclusive end date. Defaults to today (UTC). */
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UtilizationReportResponseDto"];
+                };
+            };
+            /** @description Insufficient permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ReportingController_workerPay: {
+        parameters: {
+            query?: {
+                /** @description Inclusive start date. Defaults to (to − 29 days). */
+                from?: string;
+                /** @description Inclusive end date. Defaults to today (UTC). */
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkerPayReportResponseDto"];
+                };
+            };
+            /** @description Insufficient permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ReportingController_clientBillables: {
+        parameters: {
+            query?: {
+                /** @description Inclusive start date. Defaults to (to − 29 days). */
+                from?: string;
+                /** @description Inclusive end date. Defaults to today (UTC). */
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClientBillablesReportResponseDto"];
                 };
             };
             /** @description Insufficient permissions */

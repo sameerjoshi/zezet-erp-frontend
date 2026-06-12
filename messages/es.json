@@ -182,5 +182,27 @@
     "editRoles": "Editar roles",
     "atLeastOneRole": "Elige al menos un rol.",
     "pickRoles": "Elige los roles de esta persona."
+  },
+  "reports": {
+    "financeOnly": "Los reportes solo están disponibles para dueño y finanzas.",
+    "from": "Desde",
+    "to": "Hasta",
+    "tabTrips": "Viajes",
+    "tabUtilization": "Utilización",
+    "tabWorkerPay": "Pago al personal",
+    "tabClientBillables": "Facturable por cliente",
+    "totalTrips": "viajes",
+    "truck": "Camión",
+    "trips": "Viajes",
+    "date": "Fecha",
+    "trucksWithTrips": "Camiones con viajes",
+    "utilization": "Utilización",
+    "worker": "Persona",
+    "driverPay": "Pago conductor",
+    "helperPay": "Pago ayudante",
+    "total": "Total",
+    "client": "Cliente",
+    "billable": "Facturable",
+    "noData": "No hay datos para este rango."
   }
 }
