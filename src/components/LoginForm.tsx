@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { usePathname, useRouter } from '@/i18n/navigation';
+import { login } from '@/lib/api/auth';
+import { ApiError } from '@/lib/api/client';
 
 export function LoginForm() {
   const t = useTranslations('common');
@@ -11,16 +13,34 @@ export function LoginForm() {
   const pathname = usePathname();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
   const setLocale = (next: 'en' | 'es') => {
     if (next !== locale) router.replace(pathname, { locale: next });
   };
 
-  const onSubmit = (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: POST /auth/login (credentials: 'include'), keep access token in memory,
-    // then router.replace('/dashboard'). Wire once the API client lands.
-    router.replace('/dashboard');
+    setError(null);
+    setBusy(true);
+    try {
+      await login(username.trim(), password);
+      router.replace('/dashboard');
+    } catch (err) {
+      const badCreds = err instanceof ApiError && err.status === 401;
+      setError(
+        badCreds
+          ? locale === 'es'
+            ? 'Usuario o contraseña incorrectos.'
+            : 'Wrong username or password.'
+          : locale === 'es'
+            ? 'No se pudo iniciar sesión. Inténtalo de nuevo.'
+            : 'Could not sign in. Please try again.',
+      );
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -75,8 +95,31 @@ export function LoginForm() {
             />
           </div>
 
-          <button className="btn" type="submit" style={{ width: '100%', justifyContent: 'center', padding: 12 }}>
-            {t('signIn')}
+          {error && (
+            <div
+              role="alert"
+              style={{
+                background: 'var(--bad-bg)',
+                color: 'var(--bad)',
+                border: '1px solid #f6c7ce',
+                borderRadius: 5,
+                padding: '9px 12px',
+                fontSize: 13,
+                fontWeight: 600,
+                marginBottom: 12,
+              }}
+            >
+              {error}
+            </div>
+          )}
+
+          <button
+            className="btn"
+            type="submit"
+            disabled={busy}
+            style={{ width: '100%', justifyContent: 'center', padding: 12, opacity: busy ? 0.7 : 1 }}
+          >
+            {busy ? (locale === 'es' ? 'Entrando…' : 'Signing in…') : t('signIn')}
           </button>
 
           <div className="note" style={{ marginTop: 18 }}>
