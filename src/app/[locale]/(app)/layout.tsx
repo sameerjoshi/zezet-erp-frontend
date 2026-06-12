@@ -1,5 +1,6 @@
 import { setRequestLocale } from 'next-intl/server';
 import { Sidebar } from '@/components/Sidebar';
+import { AuthGate } from '@/components/AuthGate';
 
 export default async function AppLayout({
   children,
@@ -12,9 +13,11 @@ export default async function AppLayout({
   setRequestLocale(locale);
 
   return (
-    <div className="frame">
-      <Sidebar />
-      <div className="main">{children}</div>
-    </div>
+    <AuthGate>
+      <div className="frame">
+        <Sidebar />
+        <div className="main">{children}</div>
+      </div>
+    </AuthGate>
   );
 }

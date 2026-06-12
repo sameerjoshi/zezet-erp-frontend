@@ -1,14 +1,21 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Link, usePathname } from '@/i18n/navigation';
+import { Link, usePathname, useRouter } from '@/i18n/navigation';
 import type { ReactNode } from 'react';
+import { logout } from '@/lib/api/auth';
 
 type Item = { href: string; label: string; icon: ReactNode; lock?: boolean };
 
 export function Sidebar() {
   const t = useTranslations('nav');
   const pathname = usePathname();
+  const router = useRouter();
+
+  const onSignOut = async () => {
+    await logout();
+    router.replace('/login');
+  };
 
   const items: Item[] = [
     { href: '/dashboard', label: t('dashboard'), icon: I.grid },
@@ -55,7 +62,9 @@ export function Sidebar() {
           <small>Owner</small>
         </div>
       </div>
-      <button className="signout">{I.out} Sign out</button>
+      <button className="signout" onClick={onSignOut}>
+        {I.out} Sign out
+      </button>
     </aside>
   );
 }

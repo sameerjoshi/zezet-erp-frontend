@@ -424,6 +424,111 @@ export interface paths {
         patch: operations["PricingController_closeRate"];
         trace?: never;
     };
+    "/operations/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Per-truck log status for a date + fleet roll-up counts */
+        get: operations["OperationsController_summary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/daily-logs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get the daily log for a (date, truckId) — 404 if none yet */
+        get: operations["OperationsController_getLog"];
+        put?: never;
+        /** Get-or-create the daily log for a (date, truckId) */
+        post: operations["OperationsController_createLog"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/daily-logs/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a daily log (with trips + derived totals) */
+        get: operations["OperationsController_getLogById"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update a daily log (fuel, odometer, notes) */
+        patch: operations["OperationsController_updateLog"];
+        trace?: never;
+    };
+    "/daily-logs/{id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Confirm a daily log (draft → confirmed) */
+        patch: operations["OperationsController_confirmLog"];
+        trace?: never;
+    };
+    "/daily-logs/{id}/trips": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add a trip to a daily log (rate-prepopulated, editable) */
+        post: operations["OperationsController_createTrip"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/trips/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete a trip (hard delete; ops_manager/finance/admin only) */
+        delete: operations["OperationsController_deleteTrip"];
+        options?: never;
+        head?: never;
+        /** Update a trip */
+        patch: operations["OperationsController_updateTrip"];
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -844,6 +949,169 @@ export interface components {
              * @description When this rate stops being effective (null = open-ended).
              */
             effectiveTo?: string;
+        };
+        TruckDaySummaryDto: {
+            truckId: string;
+            truckCode: string;
+            /** @enum {string} */
+            status: "none" | "draft" | "confirmed";
+            /** @description Log id when one exists, else null. */
+            logId?: Record<string, never> | null;
+            /** @description Trips recorded for this truck that day. */
+            tripCount: number;
+        };
+        OperationsSummaryCountsDto: {
+            /** @description Active trucks considered. */
+            trucks: number;
+            none: number;
+            draft: number;
+            confirmed: number;
+        };
+        OperationsSummaryResponseDto: {
+            /** Format: date */
+            date: string;
+            trucks: components["schemas"]["TruckDaySummaryDto"][];
+            counts: components["schemas"]["OperationsSummaryCountsDto"];
+        };
+        DailyLogTotalsDto: {
+            /** @description Financial — absent for ops roles. */
+            billAmount: string;
+            /** @description Financial — absent for ops roles. */
+            driverPay: string;
+            /** @description Financial — absent for ops roles. */
+            helperPay: string;
+        };
+        TripResponseDto: {
+            id: string;
+            dailyLogId: string;
+            /** @description Sequence within the log (1-based). */
+            seq: number;
+            clientId: string;
+            routeLabel?: Record<string, never> | null;
+            /** @description Financial — absent for ops roles. */
+            billAmount: string;
+            driverWorkerId: string;
+            helperWorkerId?: Record<string, never> | null;
+            /** @description Financial — absent for ops roles. */
+            driverPay: string;
+            /** @description Financial — absent for ops roles. */
+            helperPay: string;
+            rateId?: Record<string, never> | null;
+            createdById?: Record<string, never> | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        DailyLogDetailResponseDto: {
+            id: string;
+            /** Format: date */
+            date: string;
+            truckId: string;
+            /** @description Financial — absent for ops roles. */
+            fuelCost?: Record<string, never> | null;
+            odometerStart?: Record<string, never> | null;
+            odometerEnd?: Record<string, never> | null;
+            notes?: Record<string, never> | null;
+            /** @enum {string} */
+            status: "draft" | "confirmed";
+            enteredById?: Record<string, never> | null;
+            /** @description Number of trips under this log. */
+            tripCount: number;
+            totals: components["schemas"]["DailyLogTotalsDto"];
+            /** @description Non-blocking validation warnings (odometer/empty-confirm). */
+            warnings: string[];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            trips: components["schemas"]["TripResponseDto"][];
+        };
+        CreateDailyLogDto: {
+            /**
+             * Format: date
+             * @description Calendar date of the log. Unique together with truckId.
+             * @example 2026-06-12
+             */
+            date: string;
+            /** @description Truck this log belongs to. */
+            truckId: string;
+            /**
+             * @description Fuel cost for the day (financial — stripped for ops roles).
+             * @example 45
+             */
+            fuelCost?: number;
+            /** @example 120000 */
+            odometerStart?: number;
+            /** @example 120140 */
+            odometerEnd?: number;
+            notes?: string;
+        };
+        DailyLogResponseDto: {
+            id: string;
+            /** Format: date */
+            date: string;
+            truckId: string;
+            /** @description Financial — absent for ops roles. */
+            fuelCost?: Record<string, never> | null;
+            odometerStart?: Record<string, never> | null;
+            odometerEnd?: Record<string, never> | null;
+            notes?: Record<string, never> | null;
+            /** @enum {string} */
+            status: "draft" | "confirmed";
+            enteredById?: Record<string, never> | null;
+            /** @description Number of trips under this log. */
+            tripCount: number;
+            totals: components["schemas"]["DailyLogTotalsDto"];
+            /** @description Non-blocking validation warnings (odometer/empty-confirm). */
+            warnings: string[];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        UpdateDailyLogDto: {
+            /** @description Fuel cost (financial — stripped for ops roles). */
+            fuelCost?: number;
+            odometerStart?: number;
+            odometerEnd?: number;
+            notes?: string;
+        };
+        CreateTripDto: {
+            /** @description Client billed for this trip. */
+            clientId: string;
+            /** @example Ciudad → Colón */
+            routeLabel?: string;
+            /** @description Driver (Worker) for the trip. */
+            driverWorkerId: string;
+            /** @description Optional helper (Worker). */
+            helperWorkerId?: string;
+            /** @description Charge to the client. Overrides the rate when given; defaults from the effective rate, else 0. */
+            billAmount?: number;
+            /** @description Driver pay. Overrides the rate when given. */
+            driverPay?: number;
+            /** @description Helper pay. Overrides the rate when given. */
+            helperPay?: number;
+            /** @description Explicit rate to apply. When omitted, the effective rate is resolved from clientId + routeLabel. */
+            rateId?: string;
+        };
+        UpdateTripDto: {
+            /** @description Client billed for this trip. */
+            clientId?: string;
+            /** @example Ciudad → Colón */
+            routeLabel?: string;
+            /** @description Driver (Worker) for the trip. */
+            driverWorkerId?: string;
+            /** @description Optional helper (Worker). */
+            helperWorkerId?: string;
+            /** @description Charge to the client. Overrides the rate when given; defaults from the effective rate, else 0. */
+            billAmount?: number;
+            /** @description Driver pay. Overrides the rate when given. */
+            driverPay?: number;
+            /** @description Helper pay. Overrides the rate when given. */
+            helperPay?: number;
+            /** @description Explicit rate to apply. When omitted, the effective rate is resolved from clientId + routeLabel. */
+            rateId?: string;
         };
     };
     responses: never;
@@ -1815,6 +2083,273 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RateResponseDto"];
+                };
+            };
+            /** @description Insufficient permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OperationsController_summary: {
+        parameters: {
+            query: {
+                /** @description Date to summarize per-truck log status for. */
+                date: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperationsSummaryResponseDto"];
+                };
+            };
+            /** @description Insufficient permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OperationsController_getLog: {
+        parameters: {
+            query: {
+                date: string;
+                truckId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DailyLogDetailResponseDto"];
+                };
+            };
+            /** @description Insufficient permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OperationsController_createLog: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateDailyLogDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DailyLogResponseDto"];
+                };
+            };
+            /** @description Insufficient permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OperationsController_getLogById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DailyLogDetailResponseDto"];
+                };
+            };
+            /** @description Insufficient permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OperationsController_updateLog: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateDailyLogDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DailyLogResponseDto"];
+                };
+            };
+            /** @description Insufficient permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OperationsController_confirmLog: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DailyLogResponseDto"];
+                };
+            };
+            /** @description Insufficient permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OperationsController_createTrip: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateTripDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TripResponseDto"];
+                };
+            };
+            /** @description Insufficient permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OperationsController_deleteTrip: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Trip deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Insufficient permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OperationsController_updateTrip: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateTripDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TripResponseDto"];
                 };
             };
             /** @description Insufficient permissions */
