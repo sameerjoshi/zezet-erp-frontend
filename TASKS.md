@@ -11,7 +11,8 @@ Status: ⬜ todo · 🟡 in progress · ✅ done · ⛔ blocked.
 
 ## 0 · Foundations  ⬜
 - [ ] Generate the **typed API client** from the backend OpenAPI spec into `src/lib/api/generated/` + query hooks
-- [ ] Auth flow: login screen, access token in memory + refresh, route guards (redirect when unauthenticated)
+- [ ] Auth flow: login screen, **access token in memory + httpOnly-cookie refresh** (credentials: 'include';
+      on 401 → `/auth/refresh` → retry), route guards (redirect when unauthenticated). See ADR 0001 in the backend repo.
 - [ ] CI: lint / typecheck / build on push
 
 ## 1 · App shell  ⬜

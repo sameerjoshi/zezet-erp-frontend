@@ -24,7 +24,11 @@ roles**. The product must feel obvious to people who don't use software much.
   user-facing string is a key in `messages/{en,es}.json`. Use `src/i18n/navigation.ts` helpers (not raw
   next/link / next/navigation) for locale-aware routing.
 - Forms: **Zod**-validated (mirror backend DTO rules).
-- Auth: JWT access token in memory + refresh flow against the backend; never store secrets in localStorage.
+- Auth: **access token in memory only**; the **refresh token is an httpOnly cookie** set by the backend
+  (never readable/stored by JS). Send all auth requests with credentials (`fetch(..., { credentials:
+  'include' }))` / axios `withCredentials`). On a 401, call `/auth/refresh` (the cookie is sent
+  automatically), then retry. Never put any token in localStorage. This is a settled contract — see the
+  backend's `docs/decisions/0001-refresh-token-httponly-cookie.md`.
 
 ## Local setup
 ```bash
