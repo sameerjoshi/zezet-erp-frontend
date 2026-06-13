@@ -86,7 +86,7 @@ export function TripEntryView() {
   const helperOptions = workers.data?.filter((w) => w.canHelp) ?? [];
 
   return (
-    <div className="page" style={{ maxWidth: 1100 }}>
+    <div className="page">
       {/* Day bar */}
       <div className="card" style={{ marginBottom: 14 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '14px 18px', flexWrap: 'wrap' }}>
@@ -171,15 +171,16 @@ export function TripEntryView() {
                     <tr><td colSpan={9} className="helper" style={{ padding: 16 }}>{tr('noTripsYet')}</td></tr>
                   )}
                 </tbody>
+                <tfoot>
+                  <AddTripRow
+                    clients={clients.data ?? []}
+                    drivers={driverOptions}
+                    helpers={helperOptions}
+                    onAdd={(b) => addTrip.mutate(b)}
+                    adding={addTrip.isPending}
+                  />
+                </tfoot>
               </table>
-
-              <AddTripRow
-                clients={clients.data ?? []}
-                drivers={driverOptions}
-                helpers={helperOptions}
-                onAdd={(b) => addTrip.mutate(b)}
-                adding={addTrip.isPending}
-              />
 
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 18px', borderTop: '1px solid var(--line)', background: '#FBFBFD', flexWrap: 'wrap' }}>
                 <span className="helper">{tr('noCapNote')}</span>
@@ -273,53 +274,45 @@ function AddTripRow({
 
   const canAdd = clientId && driverWorkerId && !adding;
   const reset = () => { setClientId(''); setRouteLabel(''); setDriverWorkerId(''); setHelperWorkerId(''); setBill(''); setDPay(''); setHPay(''); };
+  const submit = () => {
+    onAdd({
+      clientId,
+      routeLabel: routeLabel || undefined,
+      driverWorkerId,
+      helperWorkerId: helperWorkerId || undefined,
+      billAmount: num(bill),
+      driverPay: num(dPay),
+      helperPay: num(hPay),
+    });
+    reset();
+  };
 
-  const cell = { padding: '8px 10px' } as const;
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '34px 1fr 1fr 1fr 1fr 90px 90px 90px 60px', alignItems: 'center', borderTop: '1px solid var(--line)', background: 'var(--peri)' }}>
-      <div style={{ ...cell, textAlign: 'center', fontWeight: 700, color: 'var(--blue)' }}>＋</div>
-      <div style={cell}>
+    <tr style={{ background: 'var(--peri)' }}>
+      <td style={{ textAlign: 'center', fontWeight: 700, color: 'var(--blue)' }}>＋</td>
+      <td>
         <select className="input" value={clientId} onChange={(e) => onClient(e.target.value)}>
           <option value="">{tr('clientPlaceholder')}</option>
           {clients.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
-      </div>
-      <div style={cell}><input className="input" placeholder={tr('route')} value={routeLabel} onChange={(e) => setRouteLabel(e.target.value)} /></div>
-      <div style={cell}>
+      </td>
+      <td><input className="input" placeholder={tr('route')} value={routeLabel} onChange={(e) => setRouteLabel(e.target.value)} /></td>
+      <td>
         <select className="input" value={driverWorkerId} onChange={(e) => setDriverWorkerId(e.target.value)}>
           <option value="">{tr('driverPlaceholder')}</option>
           {drivers.map((w) => <option key={w.id} value={w.id}>{w.fullName}</option>)}
         </select>
-      </div>
-      <div style={cell}>
+      </td>
+      <td>
         <select className="input" value={helperWorkerId} onChange={(e) => setHelperWorkerId(e.target.value)}>
           <option value="">{tr('noHelper')}</option>
           {helpers.map((w) => <option key={w.id} value={w.id}>{w.fullName}</option>)}
         </select>
-      </div>
-      <div style={cell}><input className="input pre" style={{ textAlign: 'right' }} placeholder="0.00" value={bill} onChange={(e) => setBill(e.target.value)} /></div>
-      <div style={cell}><input className="input pre" style={{ textAlign: 'right' }} placeholder="0.00" value={dPay} onChange={(e) => setDPay(e.target.value)} /></div>
-      <div style={cell}><input className="input pre" style={{ textAlign: 'right' }} placeholder="0.00" value={hPay} onChange={(e) => setHPay(e.target.value)} /></div>
-      <div style={cell}>
-        <button
-          className="btn sm"
-          disabled={!canAdd}
-          onClick={() => {
-            onAdd({
-              clientId,
-              routeLabel: routeLabel || undefined,
-              driverWorkerId,
-              helperWorkerId: helperWorkerId || undefined,
-              billAmount: num(bill),
-              driverPay: num(dPay),
-              helperPay: num(hPay),
-            });
-            reset();
-          }}
-        >
-          {tc('add')}
-        </button>
-      </div>
-    </div>
+      </td>
+      <td><input className="input pre" style={{ textAlign: 'right' }} placeholder="0.00" value={bill} onChange={(e) => setBill(e.target.value)} /></td>
+      <td><input className="input pre" style={{ textAlign: 'right' }} placeholder="0.00" value={dPay} onChange={(e) => setDPay(e.target.value)} /></td>
+      <td><input className="input pre" style={{ textAlign: 'right' }} placeholder="0.00" value={hPay} onChange={(e) => setHPay(e.target.value)} /></td>
+      <td><button className="btn sm" disabled={!canAdd} onClick={submit}>{tc('add')}</button></td>
+    </tr>
   );
 }

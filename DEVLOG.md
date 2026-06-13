@@ -5,6 +5,22 @@ Format per entry: **What changed · Decisions/deviations · Gotchas/risks · Nex
 
 ---
 
+## 2026-06-13 · Fixes from test-drive feedback ✅
+**What changed**
+- **Sidebar:** removed the dead **"All trips"** link (`/trips` was never built → the source of the "random 404s"). Replaced collision-prone `pathname.startsWith(href)` active-matching with segment-aware `pathname === href || startsWith(href + '/')` so `/trips/entry` no longer also lights up `/trips`.
+- **Trip Entry:** removed the `maxWidth:1100` cap (card now extends full-width like other pages); moved the add-trip row **into the table as a `<tfoot>` row** so its columns align with the headers (was a separate misaligned CSS grid).
+- Self-reviewed in a real browser (login → trip-entry): one active nav item, aligned table, full-width card.
+
+**Decisions / deviations**
+- "All trips" log view is deferred — it needs a new backend list-trips-by-range endpoint; removing the dead link is the correct fix until then.
+
+**Gotchas / risks**
+- Root cause of "random 404s" was a nav link to an unbuilt page, NOT server flakiness.
+- Reminder: do NOT run `pnpm build` while the dev server is up — it corrupts the shared `.next` and 404s every route (use `tsc --noEmit` to typecheck instead).
+
+**Next**
+- Optional: build the All-trips view (+ backend endpoint); further visual polish.
+
 ## 2026-06-12 · Master-data screens + full i18n pass ✅
 **What changed**
 - New screens (server page + client feature view, mirroring dashboard): `/trucks`, `/people`, `/clients`, `/settings` (Users, admin-only). Each has list + create/edit (modal) + deactivate, with loading/empty/error states.

@@ -27,10 +27,12 @@ export function Sidebar() {
   const initials = username.slice(0, 2).toUpperCase() || '··';
   const roleLabel = roles[0] ?? ts('owner');
 
+  // Active when on the exact route or a nested child — avoids `/trips` matching `/trips/entry`.
+  const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
+
   const items: Item[] = [
     { href: '/dashboard', label: t('dashboard'), icon: I.grid },
     { href: '/trips/entry', label: t('enterTrips'), icon: I.edit },
-    { href: '/trips', label: t('allTrips'), icon: I.list },
     { href: '/trucks', label: t('trucks'), icon: I.truck },
     { href: '/people', label: t('people'), icon: I.people },
     { href: '/clients', label: t('clientsPrices'), icon: I.tag },
@@ -47,19 +49,15 @@ export function Sidebar() {
 
       <nav className="nav">
         {items.map((it) => (
-          <Link
-            key={it.href}
-            href={it.href}
-            className={pathname.startsWith(it.href) ? 'active' : ''}
-          >
+          <Link key={it.href} href={it.href} className={isActive(it.href) ? 'active' : ''}>
             {it.icon} {it.label}
           </Link>
         ))}
         <div className="sep" />
-        <Link href="/reports" className={pathname.startsWith('/reports') ? 'active' : ''}>
+        <Link href="/reports" className={isActive('/reports') ? 'active' : ''}>
           {I.report} {t('reports')} <span className="lock">🔒</span>
         </Link>
-        <Link href="/settings" className={pathname.startsWith('/settings') ? 'active' : ''}>
+        <Link href="/settings" className={isActive('/settings') ? 'active' : ''}>
           {I.gear} {t('settings')}
         </Link>
       </nav>
