@@ -16,6 +16,14 @@ import {
 } from '@/lib/api/operations';
 
 const todayStr = () => new Date().toISOString().slice(0, 10);
+// Add/subtract calendar days on a YYYY-MM-DD string, all in UTC — avoids the
+// local-vs-UTC drift that made stepping jump 2 days in non-UTC timezones.
+const addDays = (iso: string, days: number) => {
+  const [y, m, d] = iso.split('-').map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  dt.setUTCDate(dt.getUTCDate() + days);
+  return dt.toISOString().slice(0, 10);
+};
 const num = (s: string) => (s.trim() === '' ? undefined : Number(s));
 
 export function TripEntryView() {
@@ -76,9 +84,7 @@ export function TripEntryView() {
   });
 
   const stepDate = (days: number) => {
-    const d = new Date(date + 'T00:00:00');
-    d.setDate(d.getDate() + days);
-    setDate(d.toISOString().slice(0, 10));
+    setDate(addDays(date, days));
     setTruckId(null);
   };
 
@@ -110,7 +116,7 @@ export function TripEntryView() {
       <div className="card" style={{ marginBottom: 14 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '14px 18px', flexWrap: 'wrap' }}>
           <button className="btn ghost sm" onClick={() => stepDate(-1)}>◀</button>
-          <b style={{ fontSize: 15 }}>{new Date(date + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' })}</b>
+          <b style={{ fontSize: 15 }}>{new Date(date + 'T00:00:00Z').toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' })}</b>
           <button className="btn ghost sm" onClick={() => stepDate(1)}>▶</button>
           {counts && (
             <span className="pill info" style={{ marginLeft: 8 }}>
