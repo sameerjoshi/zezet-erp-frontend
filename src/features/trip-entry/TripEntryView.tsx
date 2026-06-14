@@ -113,7 +113,7 @@ export function TripEntryView() {
   return (
     <div className="page">
       {/* Day bar */}
-      <div className="card" style={{ marginBottom: 14 }}>
+      <div className="card" style={{ marginBottom: 14, maxWidth: 1240 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '14px 18px', flexWrap: 'wrap' }}>
           <button className="btn ghost sm" onClick={() => stepDate(-1)}>◀</button>
           <b style={{ fontSize: 15 }}>{new Date(date + 'T00:00:00Z').toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' })}</b>
@@ -131,7 +131,7 @@ export function TripEntryView() {
       </div>
 
       {/* Master-detail: scalable truck rail + entry panel */}
-      <div style={{ display: 'grid', gridTemplateColumns: '256px 1fr', gap: 14, alignItems: 'start' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '256px minmax(0, 1fr)', gap: 14, alignItems: 'start', maxWidth: 1240 }}>
         {/* Left rail — scrollable, searchable list (scales to many trucks) */}
         <div className="card" style={{ position: 'sticky', top: 14, overflow: 'hidden' }}>
           <div style={{ padding: 10, borderBottom: '1px solid var(--line)' }}>
@@ -192,22 +192,22 @@ export function TripEntryView() {
               <table>
                 <thead>
                   <tr>
-                    <th style={{ width: 34 }}>#</th><th>{tr('client')}</th><th>{tr('route')}</th><th>{tr('driver')}</th><th>{tr('helper')}</th>
-                    <th style={{ width: 90 }}>{tr('charge')}</th><th style={{ width: 90 }}>{tr('driverPay')}</th><th style={{ width: 90 }}>{tr('helperPay')}</th><th style={{ width: 40 }}></th>
+                    <th style={{ width: 34, textAlign: 'center' }}>#</th><th>{tr('client')}</th><th>{tr('route')}</th><th>{tr('driver')}</th><th>{tr('helper')}</th>
+                    <th style={{ width: 96, textAlign: 'right' }}>{tr('charge')}</th><th style={{ width: 96, textAlign: 'right' }}>{tr('driverPay')}</th><th style={{ width: 96, textAlign: 'right' }}>{tr('helperPay')}</th><th style={{ width: 44 }}></th>
                   </tr>
                 </thead>
                 <tbody>
                   {detail.trips.map((t) => (
                     <tr key={t.id}>
-                      <td className="tnum">{t.seq}</td>
+                      <td className="tnum" style={{ textAlign: 'center', color: 'var(--muted)' }}>{t.seq}</td>
                       <td>{clientName(t.clientId)}</td>
                       <td className="muted">{t.routeLabel ?? '—'}</td>
                       <td>{workerName(t.driverWorkerId)}</td>
                       <td className="muted">{workerName(t.helperWorkerId)}</td>
-                      <td className="tnum">{t.billAmount ?? '🔒'}</td>
-                      <td className="tnum">{t.driverPay ?? '🔒'}</td>
-                      <td className="tnum">{t.helperPay ?? '🔒'}</td>
-                      <td>
+                      <td className="tnum" style={{ textAlign: 'right' }}>{t.billAmount ?? '🔒'}</td>
+                      <td className="tnum" style={{ textAlign: 'right' }}>{t.driverPay ?? '🔒'}</td>
+                      <td className="tnum" style={{ textAlign: 'right' }}>{t.helperPay ?? '🔒'}</td>
+                      <td style={{ textAlign: 'center' }}>
                         <button className="btn ghost sm" onClick={() => removeTrip.mutate(t.id)} title={tr('removeTrip')}>✕</button>
                       </td>
                     </tr>
@@ -357,7 +357,7 @@ function AddTripRow({
       <td><input className="input pre" style={{ textAlign: 'right' }} placeholder="0.00" value={bill} onChange={(e) => setBill(e.target.value)} /></td>
       <td><input className="input pre" style={{ textAlign: 'right' }} placeholder="0.00" value={dPay} onChange={(e) => setDPay(e.target.value)} /></td>
       <td><input className="input pre" style={{ textAlign: 'right' }} placeholder="0.00" value={hPay} onChange={(e) => setHPay(e.target.value)} /></td>
-      <td><button className="btn sm" disabled={!canAdd} onClick={submit}>{tc('add')}</button></td>
+      <td style={{ textAlign: 'center' }}><button className="btn sm" disabled={!canAdd} onClick={submit}>{tc('add')}</button></td>
     </tr>
   );
 }
