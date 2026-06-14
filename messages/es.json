@@ -96,7 +96,13 @@
     "driverPayWord": "pago conductor",
     "noCapNote": "No hay límite de viajes por día. Las advertencias nunca impiden guardar.",
     "clientPlaceholder": "Cliente…",
-    "driverPlaceholder": "Conductor…"
+    "driverPlaceholder": "Conductor…",
+    "nextPending": "Siguiente pendiente",
+    "searchTruck": "Buscar camión",
+    "filterAll": "Todos",
+    "filterPending": "Pendientes",
+    "noTrucksFound": "No se encontraron camiones.",
+    "selectTruck": "Selecciona un camión de la lista para registrar sus viajes."
   },
   "trucks": {
     "title": "Camiones",

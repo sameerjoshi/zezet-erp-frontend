@@ -5,6 +5,23 @@ Format per entry: **What changed · Decisions/deviations · Gotchas/risks · Nex
 
 ---
 
+## 2026-06-14 · Trip Entry redesign — scales to many trucks ✅
+**What changed**
+- Replaced the wrapping **truck chips** (unusable at 38 trucks) with a **master-detail layout**: a sticky, scrollable **left rail** listing all trucks (status dot · code · trip count · ✓ when confirmed) + the entry panel on the right.
+- Rail has a **search box** and an **All / Pending** filter; day bar gains a **"Next pending →"** jump to advance through unentered trucks fast.
+- Empty/placeholder states: "Select a truck…", "No trucks found." New i18n keys (EN/ES).
+- Seeded the fleet to **38 active trucks** (via API) so the design is exercised under real load.
+
+**Decisions / deviations**
+- Rail max-height `calc(100vh - 250px)` with internal scroll → handles any fleet size without pushing the page.
+- "Pending" = status !== confirmed (none or draft).
+
+**Gotchas / risks**
+- The 35 extra trucks are dev seed data (Camión 4–38, plates PA-0004…); deactivate if not wanted.
+
+**Next**
+- Optional: keyboard nav (J=next pending, Enter=add trip); All-trips view.
+
 ## 2026-06-13 · Fixes from test-drive feedback ✅
 **What changed**
 - **Sidebar:** removed the dead **"All trips"** link (`/trips` was never built → the source of the "random 404s"). Replaced collision-prone `pathname.startsWith(href)` active-matching with segment-aware `pathname === href || startsWith(href + '/')` so `/trips/entry` no longer also lights up `/trips`.

@@ -24,6 +24,8 @@ export function TripEntryView() {
   const qc = useQueryClient();
   const [date, setDate] = useState(todayStr());
   const [truckId, setTruckId] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState<'all' | 'pending'>('all');
 
   const summary = useQuery({ queryKey: ['ops-summary', date], queryFn: () => getSummary(date) });
   const clients = useQuery({ queryKey: ['clients'], queryFn: getClients });
@@ -85,6 +87,23 @@ export function TripEntryView() {
   const driverOptions = workers.data?.filter((w) => w.canDrive) ?? [];
   const helperOptions = workers.data?.filter((w) => w.canHelp) ?? [];
 
+  const allTrucks = summary.data?.trucks ?? [];
+  const pendingCount = allTrucks.filter((t) => t.status !== 'confirmed').length;
+  const visibleTrucks = allTrucks.filter((t) => {
+    if (filter === 'pending' && t.status === 'confirmed') return false;
+    if (search && !t.truckCode.toLowerCase().includes(search.toLowerCase())) return false;
+    return true;
+  });
+  const dotFor = (s: string) =>
+    s === 'confirmed' ? 'var(--ok)' : s === 'draft' ? 'var(--warn)' : 'var(--line-2)';
+  const goNextPending = () => {
+    const pend = allTrucks.filter((t) => t.status !== 'confirmed');
+    if (!pend.length) return;
+    const idx = pend.findIndex((t) => t.truckId === truckId);
+    setTruckId((pend[(idx + 1) % pend.length] ?? pend[0]).truckId);
+  };
+  const selectedCode = allTrucks.find((t) => t.truckId === truckId)?.truckCode;
+
   return (
     <div className="page">
       {/* Day bar */}
@@ -98,41 +117,61 @@ export function TripEntryView() {
               {tr('trucksEntered', { entered: counts.confirmed + counts.draft, total: counts.trucks })}
             </span>
           )}
+          <div className="spacer" />
+          <button className="btn ghost sm" disabled={pendingCount === 0} onClick={goNextPending}>
+            {tr('nextPending')} →
+          </button>
         </div>
       </div>
 
-      {/* Truck chips */}
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
-        {summary.data?.trucks.map((t) => {
-          const sel = t.truckId === truckId;
-          const dot = t.status === 'confirmed' ? 'var(--ok)' : t.status === 'draft' ? 'var(--warn)' : 'var(--line-2)';
-          return (
-            <button
-              key={t.truckId}
-              onClick={() => setTruckId(t.truckId)}
-              className="card"
-              style={{
-                display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', cursor: 'pointer',
-                border: sel ? '1px solid var(--blue)' : '1px solid var(--line)',
-                background: sel ? 'var(--peri)' : 'var(--surface)', fontWeight: 700, fontSize: 13,
-              }}
-            >
-              <span style={{ width: 9, height: 9, borderRadius: '50%', background: dot }} />
-              {t.truckCode}
-              {t.tripCount > 0 && <span className="muted" style={{ fontWeight: 600 }}>· {t.tripCount}</span>}
-            </button>
-          );
-        })}
-      </div>
+      {/* Master-detail: scalable truck rail + entry panel */}
+      <div style={{ display: 'grid', gridTemplateColumns: '256px 1fr', gap: 14, alignItems: 'start' }}>
+        {/* Left rail — scrollable, searchable list (scales to many trucks) */}
+        <div className="card" style={{ position: 'sticky', top: 14, overflow: 'hidden' }}>
+          <div style={{ padding: 10, borderBottom: '1px solid var(--line)' }}>
+            <input className="input" placeholder={tr('searchTruck')} value={search} onChange={(e) => setSearch(e.target.value)} />
+            <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
+              <button className={`btn sm ${filter === 'all' ? '' : 'ghost'}`} onClick={() => setFilter('all')}>
+                {tr('filterAll')} {allTrucks.length}
+              </button>
+              <button className={`btn sm ${filter === 'pending' ? '' : 'ghost'}`} onClick={() => setFilter('pending')}>
+                {tr('filterPending')} {pendingCount}
+              </button>
+            </div>
+          </div>
+          <div style={{ maxHeight: 'calc(100vh - 250px)', overflowY: 'auto' }}>
+            {visibleTrucks.map((t) => {
+              const sel = t.truckId === truckId;
+              return (
+                <button
+                  key={t.truckId}
+                  onClick={() => setTruckId(t.truckId)}
+                  style={{
+                    width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 13px',
+                    border: 0, borderLeft: sel ? '3px solid var(--blue)' : '3px solid transparent',
+                    borderBottom: '1px solid var(--line)', background: sel ? 'var(--peri)' : 'transparent',
+                    cursor: 'pointer', font: '600 13px var(--font)', color: 'var(--ink)', textAlign: 'left',
+                  }}
+                >
+                  <span style={{ width: 9, height: 9, borderRadius: '50%', background: dotFor(t.status), flex: 'none' }} />
+                  <span style={{ flex: 1 }}>{t.truckCode}</span>
+                  {t.tripCount > 0 && <span className="muted" style={{ fontWeight: 700 }}>{t.tripCount}</span>}
+                  {t.status === 'confirmed' && <span style={{ color: 'var(--ok)', fontWeight: 800 }}>✓</span>}
+                </button>
+              );
+            })}
+            {visibleTrucks.length === 0 && <div className="helper" style={{ padding: 14 }}>{tr('noTrucksFound')}</div>}
+          </div>
+        </div>
 
-      {/* Selected truck panel */}
-      {truckId && (
+        {/* Right — entry panel for the selected truck */}
         <div className="card">
-          {log.isLoading && <div className="bd helper">{tr('loading')}</div>}
-          {detail && (
+          {!truckId && <div className="bd helper">{tr('selectTruck')}</div>}
+          {truckId && log.isLoading && <div className="bd helper">{tr('loading')}</div>}
+          {truckId && detail && (
             <>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '13px 18px', borderBottom: '1px solid var(--line)', flexWrap: 'wrap' }}>
-                <b style={{ fontSize: 16 }}>{summary.data?.trucks.find((t) => t.truckId === truckId)?.truckCode}</b>
+                <b style={{ fontSize: 16 }}>{selectedCode}</b>
                 <span className={`pill ${detail.status === 'confirmed' ? 'ok' : 'warn'}`}>{ts(detail.status)}</span>
                 <div className="spacer" />
                 <FuelOdometer detail={detail} onSave={(b) => saveLog.mutate(b)} saving={saveLog.isPending} />
@@ -195,7 +234,7 @@ export function TripEntryView() {
             </>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

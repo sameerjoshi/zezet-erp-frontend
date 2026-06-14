@@ -96,7 +96,13 @@
     "driverPayWord": "driver pay",
     "noCapNote": "No cap on trips per day. Warnings never block saving.",
     "clientPlaceholder": "Client…",
-    "driverPlaceholder": "Driver…"
+    "driverPlaceholder": "Driver…",
+    "nextPending": "Next pending",
+    "searchTruck": "Search truck",
+    "filterAll": "All",
+    "filterPending": "Pending",
+    "noTrucksFound": "No trucks found.",
+    "selectTruck": "Select a truck from the list to enter its trips."
   },
   "trucks": {
     "title": "Trucks",
