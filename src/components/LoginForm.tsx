@@ -38,22 +38,6 @@ export function LoginForm() {
 
   return (
     <div className="auth">
-      <section className="show">
-        <div className="lw">
-          <span className="z">Z</span> zezet
-        </div>
-        <div>
-          <h2>{t('tagline')}</h2>
-          <p>{tl('promo')}</p>
-          <div className="mini">
-            <div className="r"><span style={{ opacity: 0.85 }}>{tl('trucksOut')}</span><b>28 / 38</b></div>
-            <div className="r"><span style={{ opacity: 0.85 }}>{tl('tripsLogged')}</span><b>31</b></div>
-            <div className="r"><span style={{ opacity: 0.85 }}>{tl('fleetInUse')}</span><b>81%</b></div>
-          </div>
-        </div>
-        <div style={{ fontSize: 12, opacity: 0.7 }}>zezet.net · Panamá</div>
-      </section>
-
       <section className="formside">
         <form className="box" onSubmit={onSubmit}>
           <h3>{t('signIn')}</h3>
@@ -127,6 +111,16 @@ export function LoginForm() {
             </span>
           </div>
         </form>
+      </section>
+
+      <section className="hero">
+        <div className="lw">
+          <span className="z">Z</span> zezet
+        </div>
+        <div className="hero-copy">
+          <h2 className="hero-tag">{tl('heroTagline')}</h2>
+          <div className="hero-foot">zezet.net · Panamá</div>
+        </div>
       </section>
     </div>
   );

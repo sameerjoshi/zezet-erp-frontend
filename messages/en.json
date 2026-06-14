@@ -45,6 +45,7 @@
   },
   "login": {
     "subtitle": "Sign in with the username your admin gave you.",
+    "heroTagline": "Logistics solutions tailored to your business.",
     "promo": "Trips, drivers, fuel and billing for the whole fleet — simple enough to use every night.",
     "trucksOut": "Trucks out today",
     "tripsLogged": "Trips logged",

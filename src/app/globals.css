@@ -164,19 +164,7 @@ svg { display: block; }
 .grid2 { display:grid; gap:14px; }
 
 /* ---------- login ---------- */
-.auth { min-height:100vh; display:grid; grid-template-columns:1fr 1.05fr; background:var(--bg); }
-.auth .show { position:relative; overflow:hidden; color:#fff; padding:48px; display:flex;
-  flex-direction:column; justify-content:space-between;
-  background:radial-gradient(900px 520px at 80% -10%, #5871ff 0, transparent 55%),
-             linear-gradient(160deg, #3d52e0, #1f2a9e); }
-.auth .lw { display:flex; align-items:center; gap:12px; font:900 22px var(--font); }
-.auth .lw .z { width:42px; height:42px; border-radius:8px; background:rgba(255,255,255,.16);
-  display:grid; place-items:center; }
-.auth .show h2 { font:900 36px/1.14 var(--font); margin:0 0 12px; max-width:420px; }
-.auth .show p { color:rgba(255,255,255,.84); font-size:15px; max-width:400px; }
-.auth .mini { background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2);
-  border-radius:5px; padding:14px 16px; max-width:320px; margin-top:24px; }
-.auth .mini .r { display:flex; justify-content:space-between; font-size:13.5px; padding:5px 0; }
+.auth { min-height:100vh; display:grid; grid-template-columns:1fr 1.1fr; background:var(--bg); }
 .auth .formside { display:grid; place-items:center; padding:36px; }
 .auth .box { width:100%; max-width:360px; }
 .auth .box h3 { font:900 24px var(--font); margin:0 0 4px; }
@@ -185,7 +173,20 @@ svg { display: block; }
 .auth .field .es { color:var(--faint); font-weight:600; }
 .auth .note { display:flex; gap:10px; align-items:flex-start; background:#f4f6ff; border:1px solid #dce2fb;
   border-radius:5px; padding:11px 14px; font-size:13px; color:#3a4574; }
-@media (max-width:880px) { .auth { grid-template-columns:1fr; } .auth .show { display:none; } }
+
+/* right column: full-bleed Zezet fleet photo + dark overlay + tagline */
+.auth .hero { position:relative; overflow:hidden; color:#fff; padding:48px;
+  display:flex; flex-direction:column; justify-content:space-between;
+  background:#15171f url('/login-hero.jpg') center/cover no-repeat; }
+.auth .hero::before { content:''; position:absolute; inset:0;
+  background:linear-gradient(180deg, rgba(11,13,16,.28) 0%, rgba(11,13,16,.12) 40%, rgba(13,16,32,.85) 100%); }
+.auth .hero > * { position:relative; z-index:1; }
+.auth .lw { display:flex; align-items:center; gap:12px; font:900 22px var(--font); text-shadow:0 1px 10px rgba(0,0,0,.45); }
+.auth .lw .z { width:42px; height:42px; border-radius:8px; background:rgba(255,255,255,.18);
+  display:grid; place-items:center; backdrop-filter:blur(4px); }
+.auth .hero-tag { font:900 36px/1.18 var(--font); margin:0; max-width:540px; text-shadow:0 2px 20px rgba(0,0,0,.5); }
+.auth .hero-foot { font-size:12px; opacity:.9; margin-top:14px; text-shadow:0 1px 8px rgba(0,0,0,.6); }
+@media (max-width:880px) { .auth { grid-template-columns:1fr; } .auth .hero { display:none; } }
 
 /* ---------- inputs & forms (used app-wide) ---------- */
 .input { width:100%; box-sizing:border-box; border:1px solid var(--line-2); background:var(--surface);
