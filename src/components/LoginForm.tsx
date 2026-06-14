@@ -95,11 +95,6 @@ export function LoginForm() {
             {busy ? tl('signingIn') : t('signIn')}
           </button>
 
-          <div className="note" style={{ marginTop: 18 }}>
-            <span>ℹ️</span>
-            <span>{tl('noEmailNote')}</span>
-          </div>
-
           <div style={{ textAlign: 'center', marginTop: 18 }}>
             <span className="lang">
               <button type="button" className={locale === 'en' ? 'on' : ''} onClick={() => setLocale('en')}>
@@ -115,7 +110,7 @@ export function LoginForm() {
 
       <section className="hero">
         <div className="lw">
-          <span className="z">Z</span> zezet
+          <span className="z">Z</span> Zezet Panama
         </div>
         <div className="hero-copy">
           <h2 className="hero-tag">{tl('heroTagline')}</h2>
