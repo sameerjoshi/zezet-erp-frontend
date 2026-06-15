@@ -265,7 +265,7 @@ tbody tr:hover { background:var(--soft); }
 
 /* --- Mini per-day bar chart ------------------------------------------- */
 .bars { display:flex; align-items:flex-end; gap:4px; height:120px; padding-top:8px; }
-.bars .col { flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; min-width:0; }
+.bars .col { flex:1; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:6px; min-width:0; height:100%; }
 .bars .bar { width:100%; max-width:26px; background:var(--blue); border-radius:3px 3px 0 0;
   min-height:2px; transition:height .2s; }
 .bars .bar.zero { background:var(--line-2); }
