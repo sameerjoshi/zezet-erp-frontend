@@ -1,11 +1,14 @@
 import { apiFetch } from './client';
 
 export type TruckStatus = 'none' | 'draft' | 'confirmed';
+// What the truck did that day. null = not yet recorded / not expected.
+export type OperStatus = 'operating' | 'no_clients' | 'broken';
 
 export interface TruckSummary {
   truckId: string;
   truckCode: string;
   status: TruckStatus;
+  operStatus: OperStatus | null;
   logId: string | null;
   tripCount: number;
 }
@@ -39,6 +42,7 @@ export interface DailyLogDetail {
   id: string;
   date: string;
   truckId: string;
+  operStatus: OperStatus | null;
   fuelCost: string | null;
   odometerStart: number | null;
   odometerEnd: number | null;
@@ -67,7 +71,13 @@ export const getDailyLog = (id: string) => apiFetch<DailyLogDetail>(`/daily-logs
 
 export const updateDailyLog = (
   id: string,
-  body: { fuelCost?: number; odometerStart?: number; odometerEnd?: number; notes?: string },
+  body: {
+    operStatus?: OperStatus;
+    fuelCost?: number;
+    odometerStart?: number;
+    odometerEnd?: number;
+    notes?: string;
+  },
 ) => apiFetch<DailyLogDetail>(`/daily-logs/${id}`, { method: 'PATCH', body: JSON.stringify(body) });
 
 export const confirmDailyLog = (id: string) =>

@@ -13,6 +13,7 @@ import {
   lookupRate,
   getSummary,
   type CreateTripInput,
+  type OperStatus,
 } from '@/lib/api/operations';
 
 const todayStr = () => new Date().toISOString().slice(0, 10);
@@ -70,6 +71,10 @@ export function TripEntryView() {
       updateDailyLog(log.data!.id, b),
     onSuccess: refetchAll,
   });
+  const setOper = useMutation({
+    mutationFn: (s: OperStatus) => updateDailyLog(log.data!.id, { operStatus: s }),
+    onSuccess: refetchAll,
+  });
   const confirm = useMutation({
     mutationFn: () => confirmDailyLog(log.data!.id),
     onSuccess: refetchAll,
@@ -100,8 +105,18 @@ export function TripEntryView() {
     if (search && !t.truckCode.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
-  const dotFor = (s: string) =>
-    s === 'confirmed' ? 'var(--ok)' : s === 'draft' ? 'var(--warn)' : 'var(--line-2)';
+  // Dot colour reflects operational state first (broken/no-clients), then the
+  // entry workflow status (confirmed/draft/none).
+  const dotColor = (t: { status: string; operStatus: string | null }) =>
+    t.operStatus === 'broken'
+      ? 'var(--bad)'
+      : t.operStatus === 'no_clients'
+        ? 'var(--warn)'
+        : t.status === 'confirmed'
+          ? 'var(--ok)'
+          : t.status === 'draft'
+            ? 'var(--blue)'
+            : 'var(--line-2)';
   const goNextPending = () => {
     const pend = allTrucks.filter((t) => t.status !== 'confirmed');
     if (!pend.length) return;
@@ -159,7 +174,7 @@ export function TripEntryView() {
                     cursor: 'pointer', font: '600 13px var(--font)', color: 'var(--ink)', textAlign: 'left',
                   }}
                 >
-                  <span style={{ width: 9, height: 9, borderRadius: '50%', background: dotFor(t.status), flex: 'none' }} />
+                  <span style={{ width: 9, height: 9, borderRadius: '50%', background: dotColor(t), flex: 'none' }} />
                   <span style={{ flex: 1 }}>{t.truckCode}</span>
                   {t.tripCount > 0 && <span className="muted" style={{ fontWeight: 700 }}>{t.tripCount}</span>}
                   {t.status === 'confirmed' && <span style={{ color: 'var(--ok)', fontWeight: 800 }}>✓</span>}
@@ -179,8 +194,23 @@ export function TripEntryView() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '13px 18px', borderBottom: '1px solid var(--line)', flexWrap: 'wrap' }}>
                 <b style={{ fontSize: 16 }}>{selectedCode}</b>
                 <span className={`pill ${detail.status === 'confirmed' ? 'ok' : 'warn'}`}>{ts(detail.status)}</span>
+                <span className="seg">
+                  {(['operating', 'no_clients', 'broken'] as const).map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      className={detail.operStatus === s ? 'on' : ''}
+                      disabled={setOper.isPending}
+                      onClick={() => setOper.mutate(s)}
+                    >
+                      {tr(s === 'operating' ? 'stOperating' : s === 'no_clients' ? 'stNoClients' : 'stBroken')}
+                    </button>
+                  ))}
+                </span>
                 <div className="spacer" />
-                <FuelOdometer detail={detail} onSave={(b) => saveLog.mutate(b)} saving={saveLog.isPending} />
+                {detail.operStatus !== 'no_clients' && detail.operStatus !== 'broken' && (
+                  <FuelOdometer detail={detail} onSave={(b) => saveLog.mutate(b)} saving={saveLog.isPending} />
+                )}
               </div>
 
               {detail.warnings && detail.warnings.length > 0 && (
@@ -189,6 +219,12 @@ export function TripEntryView() {
                 </div>
               )}
 
+              {(detail.operStatus === 'no_clients' || detail.operStatus === 'broken') ? (
+                <div className="bd" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '22px 18px' }}>
+                  <span style={{ width: 11, height: 11, borderRadius: '50%', flex: 'none', background: detail.operStatus === 'broken' ? 'var(--bad)' : 'var(--warn)' }} />
+                  <span style={{ fontWeight: 600 }}>{tr(detail.operStatus === 'broken' ? 'idleBroken' : 'idleNoClients')}</span>
+                </div>
+              ) : (
               <table>
                 <thead>
                   <tr>
@@ -221,11 +257,17 @@ export function TripEntryView() {
                     clients={clients.data ?? []}
                     drivers={driverOptions}
                     helpers={helperOptions}
-                    onAdd={(b) => addTrip.mutate(b)}
+                    onAdd={(b) => {
+                      addTrip.mutate(b);
+                      // A trip means the truck operated — classify the day so it
+                      // counts toward the operating %.
+                      if (detail.operStatus !== 'operating') setOper.mutate('operating');
+                    }}
                     adding={addTrip.isPending}
                   />
                 </tfoot>
               </table>
+              )}
 
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 18px', borderTop: '1px solid var(--line)', background: '#FBFBFD', flexWrap: 'wrap' }}>
                 <span className="helper">{tr('noCapNote')}</span>

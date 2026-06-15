@@ -10,6 +10,7 @@ export interface Truck {
   year: number | null;
   sizeFt: number | null;
   purchaseDate: string | null;
+  inServiceDate: string | null;
   purchasePrice: string | null; // financial
   odometerStart: number | null;
   status: 'active' | 'inactive';
@@ -20,6 +21,7 @@ export interface TruckInput {
   year?: number;
   sizeFt?: number;
   purchaseDate?: string;
+  inServiceDate?: string;
   purchasePrice?: number;
   odometerStart?: number;
   status?: 'active' | 'inactive';

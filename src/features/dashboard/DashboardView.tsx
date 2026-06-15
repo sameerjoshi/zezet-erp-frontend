@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useLocale, useTranslations } from 'next-intl';
 import { DateRangePicker, formatRange, type DateRange } from '@/components/DateRangePicker';
 import { useAuth } from '@/lib/auth/useAuth';
-import { getTripsReport, getUtilization, getClientBillables } from '@/lib/api/reports';
+import { getTripsReport, getOperational, getClientBillables } from '@/lib/api/reports';
 
 const today = () => new Date().toISOString().slice(0, 10);
 const money = (n: number) =>
@@ -37,9 +37,9 @@ export function DashboardView() {
     queryKey: ['rep-trips', range.from, range.to],
     queryFn: () => getTripsReport(range),
   });
-  const util = useQuery({
-    queryKey: ['rep-util', range.from, range.to],
-    queryFn: () => getUtilization(range),
+  const oper = useQuery({
+    queryKey: ['rep-oper', range.from, range.to],
+    queryFn: () => getOperational(range),
   });
   const bill = useQuery({
     queryKey: ['rep-bill', range.from, range.to],
@@ -52,17 +52,12 @@ export function DashboardView() {
 
   const days = dayList(range.from, range.to);
 
-  // Average fleet use across every day in the range (missing days count as 0%),
-  // so a quiet week isn't flattered by averaging only its busy days.
-  const utilMap = new Map((util.data?.perDay ?? []).map((d) => [d.date, d.utilization]));
-  const avgUtil = !util.data
-    ? null
-    : Math.round(
-        (days.reduce((s, d) => {
-          const u = utilMap.get(d) ?? 0;
-          return s + (u <= 1 ? u * 100 : u);
-        }, 0) / days.length),
-      );
+  // Operating % over the range: of the truck-days that were recorded (operating /
+  // no-clients / broken), how many were operating. Unrecorded days are excluded,
+  // so Sundays and not-in-service trucks don't deflate it.
+  const operatingPct = oper.data
+    ? Math.round(oper.data.totals.operatingPct * 100)
+    : null;
 
   const totalBill = bill.data
     ? bill.data.clients.reduce((s, c) => s + Number(c.billAmount), 0)
@@ -78,7 +73,7 @@ export function DashboardView() {
     .slice(0, 6);
   const maxClient = Math.max(1, ...topClients.map((c) => Number(c.billAmount)));
 
-  const isLoading = trips.isLoading || util.isLoading;
+  const isLoading = trips.isLoading || oper.isLoading;
   const empty = !isLoading && (totalTrips ?? 0) === 0;
   // few days -> show every label; long ranges -> thin them out so they don't collide
   const labelEvery = perDay.length > 16 ? Math.ceil(perDay.length / 12) : 1;
@@ -99,7 +94,7 @@ export function DashboardView() {
       <div className="kpibar reveal d1">
         <Kpi tone="blue" label={t('totalTrips')} value={totalTrips} />
         <Kpi tone="green" label={t('trucksUsed')} value={trucksUsed} />
-        <Kpi tone="amber" label={t('avgUtilization')} value={avgUtil == null ? null : `${avgUtil}%`} />
+        <Kpi tone="amber" label={t('operatingPct')} value={operatingPct == null ? null : `${operatingPct}%`} />
         {canSeeMoney ? (
           <Kpi tone="red" label={t('amountToBill')} value={totalBill == null ? null : money(totalBill)} />
         ) : (

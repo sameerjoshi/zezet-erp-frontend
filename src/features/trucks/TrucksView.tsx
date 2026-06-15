@@ -162,6 +162,7 @@ function TruckForm({
   const [year, setYear] = useState(truck?.year?.toString() ?? '');
   const [sizeFt, setSizeFt] = useState(truck?.sizeFt?.toString() ?? '');
   const [purchaseDate, setPurchaseDate] = useState(truck?.purchaseDate?.slice(0, 10) ?? '');
+  const [inServiceDate, setInServiceDate] = useState(truck?.inServiceDate?.slice(0, 10) ?? '');
   const [purchasePrice, setPurchasePrice] = useState(truck?.purchasePrice ?? '');
   const [odometerStart, setOdometerStart] = useState(truck?.odometerStart?.toString() ?? '');
 
@@ -172,6 +173,7 @@ function TruckForm({
       year: num(year),
       sizeFt: num(sizeFt),
       purchaseDate: purchaseDate || undefined,
+      inServiceDate: inServiceDate || undefined,
       odometerStart: num(odometerStart),
     };
     if (canSeeMoney) body.purchasePrice = num(purchasePrice);
@@ -217,6 +219,10 @@ function TruckForm({
         <div>
           <label className="flabel">{t('purchaseDate')}</label>
           <input className="input" type="date" value={purchaseDate} onChange={(e) => setPurchaseDate(e.target.value)} />
+        </div>
+        <div>
+          <label className="flabel">{t('inServiceDate')}</label>
+          <input className="input" type="date" value={inServiceDate} onChange={(e) => setInServiceDate(e.target.value)} />
         </div>
         {canSeeMoney && (
           <div>

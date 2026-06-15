@@ -563,6 +563,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/reports/operational": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Operating vs idle (no clients) vs broken per day, with operating % */
+        get: operations["ReportingController_operational"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/reports/worker-pay": {
         parameters: {
             query?: never;
@@ -717,6 +734,12 @@ export interface components {
              */
             purchaseDate?: string;
             /**
+             * Format: date
+             * @description Date the truck is ready/legal to drive. Counts toward operational % only from this date.
+             * @example 2019-04-01
+             */
+            inServiceDate?: string;
+            /**
              * @description Acquisition cost (financial — stripped for ops roles).
              * @example 45000
              */
@@ -737,6 +760,8 @@ export interface components {
             year?: Record<string, never> | null;
             sizeFt?: Record<string, never> | null;
             purchaseDate?: Record<string, never> | null;
+            /** @description Date ready to drive; counts toward operational % from here. */
+            inServiceDate?: Record<string, never> | null;
             /** @description Financial — absent in responses to ops roles. */
             purchasePrice?: Record<string, never> | null;
             odometerStart?: Record<string, never> | null;
@@ -767,6 +792,12 @@ export interface components {
              * @example 2019-03-15
              */
             purchaseDate?: string;
+            /**
+             * Format: date
+             * @description Date the truck is ready/legal to drive. Counts toward operational % only from this date.
+             * @example 2019-04-01
+             */
+            inServiceDate?: string;
             /**
              * @description Acquisition cost (financial — stripped for ops roles).
              * @example 45000
@@ -1023,6 +1054,11 @@ export interface components {
             truckCode: string;
             /** @enum {string} */
             status: "none" | "draft" | "confirmed";
+            /**
+             * @description Operational status that day: operating / no_clients / broken.
+             * @enum {string|null}
+             */
+            operStatus?: "operating" | "no_clients" | "broken" | null;
             /** @description Log id when one exists, else null. */
             logId?: Record<string, never> | null;
             /** @description Trips recorded for this truck that day. */
@@ -1083,6 +1119,11 @@ export interface components {
             notes?: Record<string, never> | null;
             /** @enum {string} */
             status: "draft" | "confirmed";
+            /**
+             * @description Operational status: operating / no_clients / broken / null.
+             * @enum {string|null}
+             */
+            operStatus?: "operating" | "no_clients" | "broken" | null;
             enteredById?: Record<string, never> | null;
             /** @description Number of trips under this log. */
             tripCount: number;
@@ -1104,6 +1145,11 @@ export interface components {
             date: string;
             /** @description Truck this log belongs to. */
             truckId: string;
+            /**
+             * @description What the truck did that day: operating / no_clients / broken. Omit when not yet recorded.
+             * @enum {string}
+             */
+            operStatus?: "operating" | "no_clients" | "broken";
             /**
              * @description Fuel cost for the day (financial — stripped for ops roles).
              * @example 45
@@ -1127,6 +1173,11 @@ export interface components {
             notes?: Record<string, never> | null;
             /** @enum {string} */
             status: "draft" | "confirmed";
+            /**
+             * @description Operational status: operating / no_clients / broken / null.
+             * @enum {string|null}
+             */
+            operStatus?: "operating" | "no_clients" | "broken" | null;
             enteredById?: Record<string, never> | null;
             /** @description Number of trips under this log. */
             tripCount: number;
@@ -1139,6 +1190,11 @@ export interface components {
             updatedAt: string;
         };
         UpdateDailyLogDto: {
+            /**
+             * @description What the truck did that day: operating / no_clients / broken.
+             * @enum {string}
+             */
+            operStatus?: "operating" | "no_clients" | "broken";
             /** @description Fuel cost (financial — stripped for ops roles). */
             fuelCost?: number;
             odometerStart?: number;
@@ -1229,6 +1285,38 @@ export interface components {
             /** Format: date */
             to: string;
             perDay: components["schemas"]["DayUtilizationDto"][];
+        };
+        OperationalBucketDto: {
+            operating: number;
+            /** @description Idle for lack of clients (sales). */
+            noClients: number;
+            /** @description Down for repair (mechanics). */
+            broken: number;
+            /** @description operating + noClients + broken. */
+            recorded: number;
+            /** @description operating / recorded, 0..1 (×100 for percent). */
+            operatingPct: number;
+        };
+        OperationalDayDto: {
+            operating: number;
+            /** @description Idle for lack of clients (sales). */
+            noClients: number;
+            /** @description Down for repair (mechanics). */
+            broken: number;
+            /** @description operating + noClients + broken. */
+            recorded: number;
+            /** @description operating / recorded, 0..1 (×100 for percent). */
+            operatingPct: number;
+            /** Format: date */
+            date: string;
+        };
+        OperationalReportResponseDto: {
+            /** Format: date */
+            from: string;
+            /** Format: date */
+            to: string;
+            totals: components["schemas"]["OperationalBucketDto"];
+            perDay: components["schemas"]["OperationalDayDto"][];
         };
         WorkerPayDto: {
             workerId: string;
@@ -2575,6 +2663,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UtilizationReportResponseDto"];
+                };
+            };
+            /** @description Insufficient permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ReportingController_operational: {
+        parameters: {
+            query?: {
+                /** @description Inclusive start date. Defaults to (to − 29 days). */
+                from?: string;
+                /** @description Inclusive end date. Defaults to today (UTC). */
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperationalReportResponseDto"];
                 };
             };
             /** @description Insufficient permissions */

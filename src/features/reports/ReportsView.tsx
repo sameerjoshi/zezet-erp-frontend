@@ -7,6 +7,7 @@ import { useAuth } from '@/lib/auth/useAuth';
 import {
   getTripsReport,
   getUtilization,
+  getOperational,
   getWorkerPay,
   getClientBillables,
   type Range,
@@ -14,7 +15,12 @@ import {
 import { usePaged } from '@/lib/usePaged';
 import { Pagination } from '@/components/Pagination';
 
-type Tab = 'trips' | 'utilization' | 'workerPay' | 'clientBillables';
+type Tab =
+  | 'operational'
+  | 'trips'
+  | 'utilization'
+  | 'workerPay'
+  | 'clientBillables';
 
 const isoBack = (days: number) => {
   const d = new Date();
@@ -27,7 +33,7 @@ export function ReportsView() {
   const { canSeeMoney, isLoading: authLoading } = useAuth();
   const [from, setFrom] = useState(isoBack(29));
   const [to, setTo] = useState(isoBack(0));
-  const [tab, setTab] = useState<Tab>('trips');
+  const [tab, setTab] = useState<Tab>('operational');
 
   if (authLoading) return <div className="page helper">…</div>;
   if (!canSeeMoney) {
@@ -42,6 +48,7 @@ export function ReportsView() {
 
   const range: Range = { from, to };
   const tabs: { key: Tab; label: string }[] = [
+    { key: 'operational', label: t('tabOperational') },
     { key: 'trips', label: t('tabTrips') },
     { key: 'utilization', label: t('tabUtilization') },
     { key: 'workerPay', label: t('tabWorkerPay') },
@@ -67,6 +74,7 @@ export function ReportsView() {
         </div>
       </div>
 
+      {tab === 'operational' && <OperationalPanel range={range} />}
       {tab === 'trips' && <TripsPanel range={range} />}
       {tab === 'utilization' && <UtilizationPanel range={range} />}
       {tab === 'workerPay' && <WorkerPayPanel range={range} />}
@@ -86,6 +94,52 @@ function Panel({ title, children }: { title: string; children: React.ReactNode }
 function Empty() {
   const t = useTranslations('reports');
   return <div className="bd helper">{t('noData')}</div>;
+}
+
+function OperationalPanel({ range }: { range: Range }) {
+  const t = useTranslations('reports');
+  const q = useQuery({ queryKey: ['rep-oper', range], queryFn: () => getOperational(range) });
+  const recordedDays = (q.data?.perDay ?? []).filter((d) => d.recorded > 0);
+  const pg = usePaged(recordedDays, 20);
+  const tot = q.data?.totals;
+  const pctTotal = tot ? Math.round(tot.operatingPct * 100) : null;
+  return (
+    <Panel
+      title={`${t('tabOperational')}${pctTotal == null ? '' : ` · ${pctTotal}% ${t('operating')}`}`}
+    >
+      {q.isLoading ? (
+        <div className="bd helper">…</div>
+      ) : recordedDays.length === 0 ? (
+        <Empty />
+      ) : (
+        <>
+          <table>
+            <thead>
+              <tr>
+                <th>{t('date')}</th>
+                <th style={{ textAlign: 'right' }}>{t('operating')}</th>
+                <th style={{ textAlign: 'right' }}>{t('noClients')}</th>
+                <th style={{ textAlign: 'right' }}>{t('broken')}</th>
+                <th style={{ textAlign: 'right' }}>{t('operatingPct')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pg.pageItems.map((d) => (
+                <tr key={d.date}>
+                  <td>{d.date}</td>
+                  <td className="tnum" style={{ textAlign: 'right' }}>{d.operating}</td>
+                  <td className="tnum" style={{ textAlign: 'right' }}>{d.noClients}</td>
+                  <td className="tnum" style={{ textAlign: 'right' }}>{d.broken}</td>
+                  <td className="tnum" style={{ textAlign: 'right', fontWeight: 700 }}>{Math.round(d.operatingPct * 100)}%</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <Pagination paged={pg} />
+        </>
+      )}
+    </Panel>
+  );
 }
 
 function TripsPanel({ range }: { range: Range }) {
