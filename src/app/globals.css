@@ -225,3 +225,53 @@ tbody tr:hover { background:var(--soft); }
 .linkbtn { background:none; border:0; color:var(--blue); font:700 13px var(--font); cursor:pointer; padding:0; }
 .errbox { background:var(--bad-bg); color:var(--bad); border:1px solid #f6c7ce; border-radius:var(--radius);
   padding:9px 12px; font-size:13px; font-weight:600; }
+
+/* --- Date range picker ------------------------------------------------ */
+.drp { position:relative; }
+.drp-trigger { display:inline-flex; align-items:center; gap:8px; background:var(--surface);
+  border:1px solid var(--line-2); border-radius:var(--rb); color:var(--ink);
+  font:700 13px var(--font); padding:8px 12px; cursor:pointer; }
+.drp-trigger:hover { border-color:var(--blue); }
+.drp-trigger svg:first-child { color:var(--blue); }
+.drp-trigger svg:last-child { color:var(--muted); }
+.drp-pop { position:absolute; right:0; top:calc(100% + 6px); z-index:40; display:flex;
+  background:var(--surface); border:1px solid var(--line-2); border-radius:8px;
+  box-shadow:0 14px 40px rgba(20,22,32,.18); overflow:hidden; }
+.drp-presets { display:flex; flex-direction:column; min-width:140px; border-right:1px solid var(--line);
+  background:#fafbfd; padding:6px; gap:2px; }
+.drp-preset { text-align:left; border:0; background:none; color:var(--ink); font:600 13px var(--font);
+  padding:9px 12px; border-radius:var(--rb); cursor:pointer; }
+.drp-preset:hover { background:var(--peri); }
+.drp-preset.on { background:var(--blue); color:#fff; }
+.drp-cal { padding:12px; }
+.drp-months { display:flex; gap:18px; }
+.drp-foot { display:flex; align-items:center; gap:8px; margin-top:10px; padding-top:10px;
+  border-top:1px solid var(--line); }
+.cm { width:230px; }
+.cm-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+.cm-head b { font:800 13px var(--font); }
+.cm-nav { width:26px; height:26px; border:1px solid var(--line-2); background:var(--surface);
+  border-radius:var(--rb); cursor:pointer; color:var(--ink); font-size:16px; line-height:1; }
+.cm-nav:hover { border-color:var(--blue); color:var(--blue); }
+.cm-nav.ph { border:0; background:none; cursor:default; }
+.cm-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; }
+.cm-dow { text-align:center; font:700 10.5px var(--font); color:var(--muted); padding:2px 0; text-transform:capitalize; }
+.cm-day { aspect-ratio:1; border:0; background:none; border-radius:var(--rb); cursor:pointer;
+  font:600 12.5px var(--font); color:var(--ink); }
+.cm-day:hover:not(.off) { background:var(--peri); }
+.cm-day.inr { background:var(--peri); border-radius:0; }
+.cm-day.edge { background:var(--blue); color:#fff; }
+.cm-day.off { color:var(--faint); cursor:default; }
+
+/* --- Mini per-day bar chart ------------------------------------------- */
+.bars { display:flex; align-items:flex-end; gap:4px; height:120px; padding-top:8px; }
+.bars .col { flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; min-width:0; }
+.bars .bar { width:100%; max-width:26px; background:var(--blue); border-radius:3px 3px 0 0;
+  min-height:2px; transition:height .2s; }
+.bars .bar.zero { background:var(--line-2); }
+.bars .blab { font:600 10px var(--font); color:var(--muted); white-space:nowrap; }
+.barrow { display:flex; align-items:center; gap:10px; padding:6px 0; }
+.barrow .nm { width:90px; font:600 12.5px var(--font); flex:none; }
+.barrow .track { flex:1; height:9px; background:var(--soft); border-radius:999px; overflow:hidden; }
+.barrow .fill { height:100%; background:var(--blue); border-radius:999px; }
+.barrow .val { width:34px; text-align:right; font:700 12.5px var(--font); }

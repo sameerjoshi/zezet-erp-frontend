@@ -58,20 +58,25 @@
     "spanish": "Español"
   },
   "dashboard": {
-    "trucksEntered": "Trucks entered",
-    "tripsToday": "Trips today",
-    "tripsOnDay": "Trips",
-    "fleetInUse": "Fleet in use",
-    "pendingEntry": "Pending entry",
+    "overview": "Overview",
+    "totalTrips": "Total trips",
+    "trucksUsed": "Trucks used",
+    "avgUtilization": "Avg. fleet use",
+    "amountToBill": "Amount to bill",
+    "tripsPerDay": "Trips per day",
+    "mostActiveTrucks": "Most active trucks",
+    "topClients": "Top clients by amount",
+    "noRange": "No trips in this period.",
+    "loadingFleet": "Loading…"
+  },
+  "range": {
     "today": "Today",
-    "fleetStatusToday": "Fleet status today",
-    "fleetStatusOn": "Fleet status, {day}",
-    "trucksCount": "{count} trucks",
-    "loadingFleet": "Loading fleet…",
-    "loadError": "Could not load fleet status.",
-    "confirmed": "Confirmed",
-    "draft": "Draft",
-    "notYet": "Not yet"
+    "yesterday": "Yesterday",
+    "thisWeek": "This week",
+    "thisMonth": "This month",
+    "lastMonth": "Last month",
+    "apply": "Apply",
+    "reset": "Reset"
   },
   "tripEntry": {
     "title": "Enter trips",

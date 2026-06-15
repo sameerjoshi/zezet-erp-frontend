@@ -58,20 +58,25 @@
     "spanish": "Español"
   },
   "dashboard": {
-    "trucksEntered": "Camiones registrados",
-    "tripsToday": "Viajes hoy",
-    "tripsOnDay": "Viajes",
-    "fleetInUse": "Flota en uso",
-    "pendingEntry": "Pendiente de registro",
+    "overview": "Resumen",
+    "totalTrips": "Viajes totales",
+    "trucksUsed": "Camiones usados",
+    "avgUtilization": "Uso medio de flota",
+    "amountToBill": "Monto a facturar",
+    "tripsPerDay": "Viajes por día",
+    "mostActiveTrucks": "Camiones más activos",
+    "topClients": "Clientes por monto",
+    "noRange": "No hay viajes en este período.",
+    "loadingFleet": "Cargando…"
+  },
+  "range": {
     "today": "Hoy",
-    "fleetStatusToday": "Estado de la flota hoy",
-    "fleetStatusOn": "Estado de la flota, {day}",
-    "trucksCount": "{count} camiones",
-    "loadingFleet": "Cargando flota…",
-    "loadError": "No se pudo cargar el estado de la flota.",
-    "confirmed": "Confirmado",
-    "draft": "Borrador",
-    "notYet": "Todavía no"
+    "yesterday": "Ayer",
+    "thisWeek": "Esta semana",
+    "thisMonth": "Este mes",
+    "lastMonth": "Mes pasado",
+    "apply": "Aplicar",
+    "reset": "Restablecer"
   },
   "tripEntry": {
     "title": "Registrar viajes",
