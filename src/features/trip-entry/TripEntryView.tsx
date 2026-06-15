@@ -106,16 +106,17 @@ export function TripEntryView() {
     return true;
   });
   // Dot colour reflects operational state first (broken/no-clients), then the
-  // entry workflow status (confirmed/draft/none).
+  // entry workflow status. Draft uses amber to match the "Draft" pill; confirmed
+  // green; none grey. no-clients gets blue so it stays distinct from draft.
   const dotColor = (t: { status: string; operStatus: string | null }) =>
     t.operStatus === 'broken'
       ? 'var(--bad)'
       : t.operStatus === 'no_clients'
-        ? 'var(--warn)'
+        ? 'var(--blue)'
         : t.status === 'confirmed'
           ? 'var(--ok)'
           : t.status === 'draft'
-            ? 'var(--blue)'
+            ? 'var(--warn)'
             : 'var(--line-2)';
   const goNextPending = () => {
     const pend = allTrucks.filter((t) => t.status !== 'confirmed');
