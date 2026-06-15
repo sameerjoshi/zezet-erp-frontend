@@ -5,6 +5,23 @@ Format per entry: **What changed · Decisions/deviations · Gotchas/risks · Nex
 
 ---
 
+## 2026-06-15 · Operational tracking UI (3-state status + operating %)
+**What changed**
+- **Enter Trips**: per-truck-day state control (`.seg`) Operating / No clients / Broken on the panel header, bound to `DailyLogDetail.operStatus` via `updateDailyLog`. Idle/broken hide the trips table and show a banner; adding a trip auto-marks the day operating; fuel/odo shown only when operating. Truck-rail dots now colour by state (broken=red, no-clients=amber, then confirmed/draft/none).
+- **Trucks**: `inServiceDate` field in the form.
+- **Dashboard**: "Avg. fleet use" KPI replaced by **Operating %** from `getOperational` (`totals.operatingPct`); dropped the utilization query.
+- **Reports**: new **Operational** tab (operating/no-clients/broken counts + % per day, paginated); now the default tab.
+- Regenerated `src/lib/api/schema.d.ts` from the deployed API; added `OperStatus`, `inServiceDate`, `OperationalReport` to the hand-written clients. EN/ES strings added.
+
+**Decisions/deviations**
+- Operating % excludes unrecorded days (null operStatus) by design — matches Xavier's blank-Sunday rule. Historical data is all-operating, so past periods read ~100% until idle/broken get recorded going forward.
+- `gen:api` points at localhost:3001; regenerated against `https://api.zezet.amplyfit.com/docs-json` since there's no local DB/API.
+
+**Gotchas/risks**
+- Client-side: the % is only as good as the chief's daily marking discipline.
+
+**Next:** sales-vs-mechanics split reporting; surface in-service date on the Trucks list; consider a dashboard 3-state breakdown chart.
+
 ## 2026-06-14 · Trip Entry redesign — scales to many trucks ✅
 **What changed**
 - Replaced the wrapping **truck chips** (unusable at 38 trucks) with a **master-detail layout**: a sticky, scrollable **left rail** listing all trucks (status dot · code · trip count · ✓ when confirmed) + the entry panel on the right.
