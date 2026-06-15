@@ -100,6 +100,9 @@ export function DateRangePicker({
   };
 
   const presets = useMemo(() => presetRanges(), []);
+  // A range can match more than one preset (e.g. on a Monday, "Today" and "This
+  // week" are the same single day). Highlight only the first match.
+  const activeKey = presets.find((p) => sameRange(p.range, value))?.key;
   const draftRange: DateRange = { from: draft.from, to: draft.to ?? draft.from };
 
   return (
@@ -122,7 +125,7 @@ export function DateRangePicker({
               <button
                 key={p.key}
                 type="button"
-                className={`drp-preset ${sameRange(p.range, value) ? 'on' : ''}`}
+                className={`drp-preset ${p.key === activeKey ? 'on' : ''}`}
                 onClick={() => choosePreset(p.range)}
               >
                 {t(p.key)}
