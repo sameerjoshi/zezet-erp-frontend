@@ -11,6 +11,22 @@ const today = () => new Date().toISOString().slice(0, 10);
 const money = (n: number) =>
   '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+// Every calendar day in [from, to], UTC. Backend reports only return days that
+// have activity, so we fill the gaps to get a continuous day-by-day axis.
+const dayList = (from: string, to: string): string[] => {
+  const out: string[] = [];
+  const [fy, fm, fd] = from.split('-').map(Number);
+  const d = new Date(Date.UTC(fy, fm - 1, fd));
+  const end = to;
+  for (let i = 0; i < 400; i++) {
+    const s = d.toISOString().slice(0, 10);
+    out.push(s);
+    if (s >= end) break;
+    d.setUTCDate(d.getUTCDate() + 1);
+  }
+  return out;
+};
+
 export function DashboardView() {
   const t = useTranslations('dashboard');
   const locale = useLocale();
@@ -34,20 +50,26 @@ export function DashboardView() {
   const totalTrips = trips.data?.totalTrips ?? null;
   const trucksUsed = trips.data?.perTruck.length ?? null;
 
-  const utilDays = util.data?.perDay ?? [];
-  const avgUtil =
-    utilDays.length === 0
-      ? null
-      : Math.round(
-          (utilDays.reduce((s, d) => s + (d.utilization <= 1 ? d.utilization * 100 : d.utilization), 0) /
-            utilDays.length),
-        );
+  const days = dayList(range.from, range.to);
+
+  // Average fleet use across every day in the range (missing days count as 0%),
+  // so a quiet week isn't flattered by averaging only its busy days.
+  const utilMap = new Map((util.data?.perDay ?? []).map((d) => [d.date, d.utilization]));
+  const avgUtil = !util.data
+    ? null
+    : Math.round(
+        (days.reduce((s, d) => {
+          const u = utilMap.get(d) ?? 0;
+          return s + (u <= 1 ? u * 100 : u);
+        }, 0) / days.length),
+      );
 
   const totalBill = bill.data
     ? bill.data.clients.reduce((s, c) => s + Number(c.billAmount), 0)
     : null;
 
-  const perDay = trips.data?.perDay ?? [];
+  const tripMap = new Map((trips.data?.perDay ?? []).map((d) => [d.date, d.tripCount]));
+  const perDay = days.map((d) => ({ date: d, tripCount: tripMap.get(d) ?? 0 }));
   const maxDay = Math.max(1, ...perDay.map((d) => d.tripCount));
   const topTrucks = [...(trips.data?.perTruck ?? [])].sort((a, b) => b.tripCount - a.tripCount).slice(0, 8);
   const maxTruck = Math.max(1, ...topTrucks.map((d) => d.tripCount));
