@@ -1,10 +1,19 @@
 'use client';
 
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { getSummary, type TruckStatus } from '@/lib/api/operations';
 
 const today = () => new Date().toISOString().slice(0, 10);
+// Step calendar days on a YYYY-MM-DD string in UTC, so the picker never drifts
+// by a day in non-UTC timezones (same fix as the trip-entry day bar).
+const addDays = (iso: string, days: number) => {
+  const [y, m, d] = iso.split('-').map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  dt.setUTCDate(dt.getUTCDate() + days);
+  return dt.toISOString().slice(0, 10);
+};
 
 const cellClass: Record<TruckStatus, string> = {
   confirmed: 'g',
@@ -14,10 +23,19 @@ const cellClass: Record<TruckStatus, string> = {
 
 export function DashboardView() {
   const t = useTranslations('dashboard');
-  const date = today();
+  const locale = useLocale();
+  const [date, setDate] = useState(today());
+  const isToday = date === today();
   const { data, isLoading, isError } = useQuery({
     queryKey: ['ops-summary', date],
     queryFn: () => getSummary(date),
+  });
+
+  const dayLabel = new Date(date + 'T00:00:00Z').toLocaleDateString(locale, {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    timeZone: 'UTC',
   });
 
   const counts = data?.counts;
@@ -26,6 +44,26 @@ export function DashboardView() {
 
   return (
     <div className="page">
+      {/* Day bar — pick any day; drives the shared ops-summary query */}
+      <div className="card" style={{ marginBottom: 14 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', flexWrap: 'wrap' }}>
+          <button className="btn ghost sm" onClick={() => setDate(addDays(date, -1))} aria-label="Previous day">◀</button>
+          <b style={{ fontSize: 15, minWidth: 190, textAlign: 'center' }}>{dayLabel}</b>
+          <button className="btn ghost sm" disabled={isToday} onClick={() => setDate(addDays(date, 1))} aria-label="Next day">▶</button>
+          <input
+            className="input"
+            type="date"
+            value={date}
+            max={today()}
+            onChange={(e) => setDate(e.target.value || today())}
+            style={{ width: 160 }}
+          />
+          {!isToday && (
+            <button className="btn ghost sm" onClick={() => setDate(today())}>{t('today')}</button>
+          )}
+        </div>
+      </div>
+
       {/* KPI strip — "Trucks entered" is live; the rest stay placeholder until their endpoints exist */}
       <div className="kpibar reveal d1">
         <div className="kpi">
@@ -53,7 +91,7 @@ export function DashboardView() {
             </svg>
           </span>
           <div className="m">
-            <div className="l">{t('tripsToday')}</div>
+            <div className="l">{isToday ? t('tripsToday') : t('tripsOnDay')}</div>
             <div className="v">{data ? data.trucks.reduce((s, t) => s + t.tripCount, 0) : '—'}</div>
           </div>
         </div>
@@ -87,7 +125,7 @@ export function DashboardView() {
       <div className="card reveal d3" style={{ marginTop: 14 }}>
         <div className="bd">
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 14 }}>
-            <h2 style={{ font: '800 16px var(--font)', margin: 0 }}>{t('fleetStatusToday')}</h2>
+            <h2 style={{ font: '800 16px var(--font)', margin: 0 }}>{isToday ? t('fleetStatusToday') : t('fleetStatusOn', { day: dayLabel })}</h2>
             <div className="spacer" />
             <span className="helper">{counts ? t('trucksCount', { count: counts.trucks }) : ''}</span>
           </div>

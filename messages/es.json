@@ -60,9 +60,12 @@
   "dashboard": {
     "trucksEntered": "Camiones registrados",
     "tripsToday": "Viajes hoy",
+    "tripsOnDay": "Viajes",
     "fleetInUse": "Flota en uso",
     "pendingEntry": "Pendiente de registro",
-    "fleetStatusToday": "Estado de la flota — hoy",
+    "today": "Hoy",
+    "fleetStatusToday": "Estado de la flota hoy",
+    "fleetStatusOn": "Estado de la flota, {day}",
     "trucksCount": "{count} camiones",
     "loadingFleet": "Cargando flota…",
     "loadError": "No se pudo cargar el estado de la flota.",

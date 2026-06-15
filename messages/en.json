@@ -60,9 +60,12 @@
   "dashboard": {
     "trucksEntered": "Trucks entered",
     "tripsToday": "Trips today",
+    "tripsOnDay": "Trips",
     "fleetInUse": "Fleet in use",
     "pendingEntry": "Pending entry",
-    "fleetStatusToday": "Fleet status — today",
+    "today": "Today",
+    "fleetStatusToday": "Fleet status today",
+    "fleetStatusOn": "Fleet status, {day}",
     "trucksCount": "{count} trucks",
     "loadingFleet": "Loading fleet…",
     "loadError": "Could not load fleet status.",
