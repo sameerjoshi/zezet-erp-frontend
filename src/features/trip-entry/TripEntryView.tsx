@@ -301,14 +301,15 @@ function AddTripRow({
   const [dPay, setDPay] = useState('');
   const [hPay, setHPay] = useState('');
 
-  // prepopulate amounts from the client's rate (editable)
+  // Prepopulate pay from the client's rate (editable). The client charge is
+  // always typed in manually: route prices move constantly, so a prefilled
+  // figure would be misleading (Xavier, 15 Jun 2026).
   const onClient = async (id: string) => {
     setClientId(id);
     if (!id) return;
     try {
       const r = await lookupRate(id, routeLabel || undefined);
       if (r.found && r.rate) {
-        if (r.rate.clientPrice != null) setBill(r.rate.clientPrice);
         if (r.rate.driverPay != null) setDPay(r.rate.driverPay);
         if (r.rate.helperPay != null) setHPay(r.rate.helperPay);
       }
