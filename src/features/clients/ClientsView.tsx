@@ -21,6 +21,8 @@ import {
   closeRate,
   type RateInput,
 } from '@/lib/api/pricing';
+import { usePaged } from '@/lib/usePaged';
+import { Pagination } from '@/components/Pagination';
 
 export function ClientsView() {
   const t = useTranslations('clients');
@@ -55,6 +57,8 @@ export function ClientsView() {
     if (window.confirm(t('confirmDeactivate', { name: c.name }))) deactivate.mutate(c.id);
   };
 
+  const pg = usePaged(clients.data ?? [], 20);
+
   return (
     <div className="page">
       <div className="toolbar">
@@ -62,7 +66,14 @@ export function ClientsView() {
           + {t('newClient')}
         </button>
         <label className="checkrow" style={{ marginLeft: 'auto' }}>
-          <input type="checkbox" checked={showDisabled} onChange={(e) => setShowDisabled(e.target.checked)} />
+          <input
+            type="checkbox"
+            checked={showDisabled}
+            onChange={(e) => {
+              setShowDisabled(e.target.checked);
+              pg.setPage(1);
+            }}
+          />
           {t('showDisabled')}
         </label>
       </div>
@@ -73,6 +84,7 @@ export function ClientsView() {
           {clients.isError && <div className="empty" style={{ color: 'var(--bad)' }}>{t('loadError')}</div>}
           {clients.data && clients.data.length === 0 && <div className="empty">{t('empty')}</div>}
           {clients.data && clients.data.length > 0 && (
+            <>
             <table>
               <thead>
                 <tr>
@@ -83,7 +95,7 @@ export function ClientsView() {
                 </tr>
               </thead>
               <tbody>
-                {clients.data.map((c) => (
+                {pg.pageItems.map((c) => (
                   <tr
                     key={c.id}
                     onClick={() => setSelected(c)}
@@ -106,6 +118,8 @@ export function ClientsView() {
                 ))}
               </tbody>
             </table>
+            <Pagination paged={pg} />
+            </>
           )}
         </div>
 

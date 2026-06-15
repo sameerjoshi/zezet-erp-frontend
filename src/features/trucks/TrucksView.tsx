@@ -13,6 +13,8 @@ import {
   type Truck,
   type TruckInput,
 } from '@/lib/api/masterdata';
+import { usePaged } from '@/lib/usePaged';
+import { Pagination } from '@/components/Pagination';
 
 const num = (s: string) => (s.trim() === '' ? undefined : Number(s));
 
@@ -50,6 +52,8 @@ export function TrucksView() {
     if (window.confirm(t('confirmDeactivate', { code: truck.code }))) deactivate.mutate(truck.id);
   };
 
+  const pg = usePaged(trucks.data ?? [], 20);
+
   return (
     <div className="page">
       <div className="toolbar">
@@ -57,7 +61,14 @@ export function TrucksView() {
           + {t('newTruck')}
         </button>
         <label className="checkrow" style={{ marginLeft: 'auto' }}>
-          <input type="checkbox" checked={showInactive} onChange={(e) => setShowInactive(e.target.checked)} />
+          <input
+            type="checkbox"
+            checked={showInactive}
+            onChange={(e) => {
+              setShowInactive(e.target.checked);
+              pg.setPage(1);
+            }}
+          />
           {t('showInactive')}
         </label>
       </div>
@@ -67,6 +78,7 @@ export function TrucksView() {
         {trucks.isError && <div className="empty" style={{ color: 'var(--bad)' }}>{t('loadError')}</div>}
         {trucks.data && trucks.data.length === 0 && <div className="empty">{t('empty')}</div>}
         {trucks.data && trucks.data.length > 0 && (
+          <>
           <table>
             <thead>
               <tr>
@@ -80,7 +92,7 @@ export function TrucksView() {
               </tr>
             </thead>
             <tbody>
-              {trucks.data.map((truck) => (
+              {pg.pageItems.map((truck) => (
                 <tr key={truck.id}>
                   <td><b>{truck.code}</b></td>
                   <td className="muted">{truck.plate ?? '—'}</td>
@@ -108,6 +120,8 @@ export function TrucksView() {
               ))}
             </tbody>
           </table>
+          <Pagination paged={pg} />
+          </>
         )}
       </div>
 

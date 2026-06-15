@@ -19,7 +19,14 @@
     "actions": "Actions",
     "errorGeneric": "Something went wrong. Please try again.",
     "optional": "optional",
-    "all": "All"
+    "all": "All",
+    "noMatch": "No matches."
+  },
+  "pager": {
+    "showing": "Showing {from}–{to} of {total}",
+    "page": "Page {page} of {pages}",
+    "prev": "Prev",
+    "next": "Next"
   },
   "status": {
     "active": "Active",

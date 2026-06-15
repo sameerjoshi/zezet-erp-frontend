@@ -14,6 +14,8 @@ import {
   type Role,
   type CreateUserInput,
 } from '@/lib/api/admin';
+import { usePaged } from '@/lib/usePaged';
+import { Pagination } from '@/components/Pagination';
 
 export function UsersView() {
   const t = useTranslations('users');
@@ -47,6 +49,9 @@ export function UsersView() {
 
   const roleName = (key: RoleKey) => roles.data?.find((r) => r.key === key)?.name ?? key;
 
+  // Called before the early returns below to keep hook order stable.
+  const pg = usePaged(users.data ?? [], 20);
+
   if (authLoading) return <div className="page"><div className="empty">{tc('loading')}</div></div>;
   if (!isAdmin) {
     return (
@@ -79,6 +84,7 @@ export function UsersView() {
         {users.isError && <div className="empty" style={{ color: 'var(--bad)' }}>{t('loadError')}</div>}
         {users.data && users.data.length === 0 && <div className="empty">{t('empty')}</div>}
         {users.data && users.data.length > 0 && (
+          <>
           <table>
             <thead>
               <tr>
@@ -89,7 +95,7 @@ export function UsersView() {
               </tr>
             </thead>
             <tbody>
-              {users.data.map((u) => (
+              {pg.pageItems.map((u) => (
                 <tr key={u.id}>
                   <td><b>{u.username}</b></td>
                   <td>
@@ -105,6 +111,8 @@ export function UsersView() {
               ))}
             </tbody>
           </table>
+          <Pagination paged={pg} />
+          </>
         )}
       </div>
 

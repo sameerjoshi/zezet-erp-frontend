@@ -12,6 +12,8 @@ import {
   type Worker,
   type WorkerInput,
 } from '@/lib/api/masterdata';
+import { usePaged } from '@/lib/usePaged';
+import { Pagination } from '@/components/Pagination';
 
 export function PeopleView() {
   const t = useTranslations('people');
@@ -20,6 +22,7 @@ export function PeopleView() {
   const qc = useQueryClient();
 
   const [showDisabled, setShowDisabled] = useState(false);
+  const [query, setQuery] = useState('');
   const [editing, setEditing] = useState<Worker | 'new' | null>(null);
 
   const workers = useQuery({
@@ -46,14 +49,37 @@ export function PeopleView() {
     if (window.confirm(t('confirmDeactivate', { name: w.fullName }))) deactivate.mutate(w.id);
   };
 
+  const all = workers.data ?? [];
+  const filtered = query
+    ? all.filter((w) => w.fullName.toLowerCase().includes(query.toLowerCase()))
+    : all;
+  const pg = usePaged(filtered, 20);
+
   return (
     <div className="page">
       <div className="toolbar">
         <button className="btn" onClick={() => setEditing('new')}>
           + {t('newWorker')}
         </button>
+        <input
+          className="input"
+          style={{ maxWidth: 240, marginLeft: 12 }}
+          placeholder={tc('search')}
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            pg.setPage(1);
+          }}
+        />
         <label className="checkrow" style={{ marginLeft: 'auto' }}>
-          <input type="checkbox" checked={showDisabled} onChange={(e) => setShowDisabled(e.target.checked)} />
+          <input
+            type="checkbox"
+            checked={showDisabled}
+            onChange={(e) => {
+              setShowDisabled(e.target.checked);
+              pg.setPage(1);
+            }}
+          />
           {t('showDisabled')}
         </label>
       </div>
@@ -61,8 +87,10 @@ export function PeopleView() {
       <div className="card">
         {workers.isLoading && <div className="empty">{tc('loading')}</div>}
         {workers.isError && <div className="empty" style={{ color: 'var(--bad)' }}>{t('loadError')}</div>}
-        {workers.data && workers.data.length === 0 && <div className="empty">{t('empty')}</div>}
-        {workers.data && workers.data.length > 0 && (
+        {workers.data && all.length === 0 && <div className="empty">{t('empty')}</div>}
+        {workers.data && all.length > 0 && pg.total === 0 && <div className="empty">{tc('noMatch')}</div>}
+        {workers.data && pg.total > 0 && (
+          <>
           <table>
             <thead>
               <tr>
@@ -74,7 +102,7 @@ export function PeopleView() {
               </tr>
             </thead>
             <tbody>
-              {workers.data.map((w) => (
+              {pg.pageItems.map((w) => (
                 <tr key={w.id}>
                   <td><b>{w.fullName}</b></td>
                   <td className="muted">{t(w.type)}</td>
@@ -97,6 +125,8 @@ export function PeopleView() {
               ))}
             </tbody>
           </table>
+          <Pagination paged={pg} />
+          </>
         )}
       </div>
 

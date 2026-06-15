@@ -11,6 +11,8 @@ import {
   getClientBillables,
   type Range,
 } from '@/lib/api/reports';
+import { usePaged } from '@/lib/usePaged';
+import { Pagination } from '@/components/Pagination';
 
 type Tab = 'trips' | 'utilization' | 'workerPay' | 'clientBillables';
 
@@ -89,17 +91,21 @@ function Empty() {
 function TripsPanel({ range }: { range: Range }) {
   const t = useTranslations('reports');
   const q = useQuery({ queryKey: ['rep-trips', range], queryFn: () => getTripsReport(range) });
+  const pg = usePaged(q.data?.perTruck ?? [], 20);
   return (
-    <Panel title={`${t('tabTrips')} — ${q.data?.totalTrips ?? '—'} ${t('totalTrips')}`}>
+    <Panel title={`${t('tabTrips')} · ${q.data?.totalTrips ?? '—'} ${t('totalTrips')}`}>
       {q.isLoading ? <div className="bd helper">…</div> : !q.data?.perTruck.length ? <Empty /> : (
+        <>
         <table>
           <thead><tr><th>{t('truck')}</th><th style={{ textAlign: 'right' }}>{t('trips')}</th></tr></thead>
           <tbody>
-            {q.data.perTruck.map((r) => (
+            {pg.pageItems.map((r) => (
               <tr key={r.truckId}><td>{r.truckCode}</td><td className="tnum" style={{ textAlign: 'right' }}>{r.tripCount}</td></tr>
             ))}
           </tbody>
         </table>
+        <Pagination paged={pg} />
+        </>
       )}
     </Panel>
   );
@@ -108,13 +114,16 @@ function TripsPanel({ range }: { range: Range }) {
 function UtilizationPanel({ range }: { range: Range }) {
   const t = useTranslations('reports');
   const q = useQuery({ queryKey: ['rep-util', range], queryFn: () => getUtilization(range) });
+  const active = (q.data?.perDay ?? []).filter((d) => d.trucksWithTrips > 0);
+  const pg = usePaged(active, 20);
   return (
     <Panel title={t('tabUtilization')}>
-      {q.isLoading ? <div className="bd helper">…</div> : !q.data?.perDay.length ? <Empty /> : (
+      {q.isLoading ? <div className="bd helper">…</div> : active.length === 0 ? <Empty /> : (
+        <>
         <table>
           <thead><tr><th>{t('date')}</th><th style={{ textAlign: 'right' }}>{t('trucksWithTrips')}</th><th style={{ textAlign: 'right' }}>{t('utilization')}</th></tr></thead>
           <tbody>
-            {q.data.perDay.filter((d) => d.trucksWithTrips > 0).map((r) => (
+            {pg.pageItems.map((r) => (
               <tr key={r.date}>
                 <td>{r.date}</td>
                 <td className="tnum" style={{ textAlign: 'right' }}>{r.trucksWithTrips} / {r.activeTrucks}</td>
@@ -123,6 +132,8 @@ function UtilizationPanel({ range }: { range: Range }) {
             ))}
           </tbody>
         </table>
+        <Pagination paged={pg} />
+        </>
       )}
     </Panel>
   );
@@ -131,13 +142,15 @@ function UtilizationPanel({ range }: { range: Range }) {
 function WorkerPayPanel({ range }: { range: Range }) {
   const t = useTranslations('reports');
   const q = useQuery({ queryKey: ['rep-pay', range], queryFn: () => getWorkerPay(range) });
+  const pg = usePaged(q.data?.workers ?? [], 20);
   return (
     <Panel title={t('tabWorkerPay')}>
       {q.isLoading ? <div className="bd helper">…</div> : !q.data?.workers.length ? <Empty /> : (
+        <>
         <table>
           <thead><tr><th>{t('worker')}</th><th style={{ textAlign: 'right' }}>{t('driverPay')}</th><th style={{ textAlign: 'right' }}>{t('helperPay')}</th><th style={{ textAlign: 'right' }}>{t('total')}</th></tr></thead>
           <tbody>
-            {q.data.workers.map((r) => (
+            {pg.pageItems.map((r) => (
               <tr key={r.workerId}>
                 <td>{r.workerName}</td>
                 <td className="tnum" style={{ textAlign: 'right' }}>{r.driverPay}</td>
@@ -147,6 +160,8 @@ function WorkerPayPanel({ range }: { range: Range }) {
             ))}
           </tbody>
         </table>
+        <Pagination paged={pg} />
+        </>
       )}
     </Panel>
   );
@@ -155,13 +170,15 @@ function WorkerPayPanel({ range }: { range: Range }) {
 function ClientBillablesPanel({ range }: { range: Range }) {
   const t = useTranslations('reports');
   const q = useQuery({ queryKey: ['rep-bill', range], queryFn: () => getClientBillables(range) });
+  const pg = usePaged(q.data?.clients ?? [], 20);
   return (
     <Panel title={t('tabClientBillables')}>
       {q.isLoading ? <div className="bd helper">…</div> : !q.data?.clients.length ? <Empty /> : (
+        <>
         <table>
           <thead><tr><th>{t('client')}</th><th style={{ textAlign: 'right' }}>{t('trips')}</th><th style={{ textAlign: 'right' }}>{t('billable')}</th></tr></thead>
           <tbody>
-            {q.data.clients.map((r) => (
+            {pg.pageItems.map((r) => (
               <tr key={r.clientId}>
                 <td>{r.clientName}</td>
                 <td className="tnum" style={{ textAlign: 'right' }}>{r.tripCount}</td>
@@ -170,6 +187,8 @@ function ClientBillablesPanel({ range }: { range: Range }) {
             ))}
           </tbody>
         </table>
+        <Pagination paged={pg} />
+        </>
       )}
     </Panel>
   );
