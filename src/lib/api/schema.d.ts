@@ -685,6 +685,60 @@ export interface paths {
         patch: operations["BillingController_update"];
         trace?: never;
     };
+    "/payroll/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Preview per-worker pay for a period */
+        get: operations["PayrollController_preview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/payroll": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List pay runs (filter by status) */
+        get: operations["PayrollController_list"];
+        put?: never;
+        /** Create a draft pay run for a period */
+        post: operations["PayrollController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/payroll/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Pay run detail with per-worker statements */
+        get: operations["PayrollController_get"];
+        put?: never;
+        post?: never;
+        /** Delete a draft pay run */
+        delete: operations["PayrollController_remove"];
+        options?: never;
+        head?: never;
+        /** Transition status (approve/paid/void) or edit notes */
+        patch: operations["PayrollController_update"];
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1534,6 +1588,81 @@ export interface components {
         UpdateInvoiceDto: {
             /** @enum {string} */
             status?: "draft" | "sent" | "paid" | "void";
+            notes?: string;
+        };
+        WorkerStatementDto: {
+            workerId: string;
+            workerName: string;
+            driverPay: string;
+            helperPay: string;
+            totalPay: string;
+            /** @description Distinct trips this worker was paid for. */
+            tripCount: number;
+        };
+        PayrollPreviewResponseDto: {
+            /** Format: date */
+            from: string;
+            /** Format: date */
+            to: string;
+            workers: components["schemas"]["WorkerStatementDto"][];
+            workerCount: number;
+            total: string;
+        };
+        PayrollRunResponseDto: {
+            id: string;
+            /** @example PAY-2026-0001 */
+            number: string;
+            /** Format: date */
+            periodFrom: string;
+            /** Format: date */
+            periodTo: string;
+            /** @enum {string} */
+            status: "draft" | "approved" | "paid" | "void";
+            total: string;
+            workerCount: number;
+            paidAt?: Record<string, never> | null;
+            notes?: Record<string, never> | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        PayrollRunDetailResponseDto: {
+            id: string;
+            /** @example PAY-2026-0001 */
+            number: string;
+            /** Format: date */
+            periodFrom: string;
+            /** Format: date */
+            periodTo: string;
+            /** @enum {string} */
+            status: "draft" | "approved" | "paid" | "void";
+            total: string;
+            workerCount: number;
+            paidAt?: Record<string, never> | null;
+            notes?: Record<string, never> | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            workers: components["schemas"]["WorkerStatementDto"][];
+        };
+        CreateRunDto: {
+            /**
+             * Format: date
+             * @example 2026-05-01
+             */
+            from: string;
+            /**
+             * Format: date
+             * @example 2026-05-31
+             */
+            to: string;
+            notes?: string;
+        };
+        UpdateRunDto: {
+            /** @enum {string} */
+            status?: "draft" | "approved" | "paid" | "void";
             notes?: string;
         };
     };
@@ -3146,6 +3275,180 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["InvoiceDetailResponseDto"];
+                };
+            };
+            /** @description Insufficient permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PayrollController_preview: {
+        parameters: {
+            query: {
+                from: string;
+                to: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PayrollPreviewResponseDto"];
+                };
+            };
+            /** @description Insufficient permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PayrollController_list: {
+        parameters: {
+            query?: {
+                /** @description Filter by status. */
+                status?: "draft" | "approved" | "paid" | "void";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PayrollRunResponseDto"][];
+                };
+            };
+            /** @description Insufficient permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PayrollController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateRunDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PayrollRunDetailResponseDto"];
+                };
+            };
+            /** @description Insufficient permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PayrollController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PayrollRunDetailResponseDto"];
+                };
+            };
+            /** @description Insufficient permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PayrollController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Insufficient permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PayrollController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateRunDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PayrollRunDetailResponseDto"];
                 };
             };
             /** @description Insufficient permissions */

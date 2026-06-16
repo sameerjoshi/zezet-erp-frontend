@@ -36,6 +36,7 @@
     "draft": "Draft",
     "confirmed": "Confirmed",
     "sent": "Sent",
+    "approved": "Approved",
     "paid": "Paid",
     "void": "Void"
   },
@@ -47,6 +48,7 @@
     "people": "People",
     "clientsPrices": "Clients & prices",
     "billing": "Billing",
+    "payroll": "Payroll",
     "reports": "Reports",
     "settings": "Settings"
   },
@@ -247,6 +249,32 @@
     "truck": "Truck",
     "route": "Route",
     "charge": "Charge"
+  },
+  "payroll": {
+    "financeOnly": "Payroll is available to owner and finance roles only.",
+    "newRun": "New pay run",
+    "createRun": "Create pay run",
+    "subtitle": "Driver and helper pay per trip, totaled by period.",
+    "run": "Pay run",
+    "runs": "Pay runs",
+    "noRuns": "No pay runs yet.",
+    "number": "Number",
+    "period": "Period",
+    "workers": "Workers",
+    "total": "Total",
+    "statusCol": "Status",
+    "from": "From",
+    "to": "To",
+    "noPayable": "No unpaid trips in this period.",
+    "willPay": "{count} workers will be paid",
+    "approve": "Approve",
+    "markPaid": "Mark paid",
+    "void": "Void",
+    "confirmVoid": "Void this run? It will no longer count and its trips are freed for re-payment.",
+    "worker": "Worker",
+    "driverPay": "Driver pay",
+    "helperPay": "Helper pay",
+    "trips": "Trips"
   },
   "reports": {
     "financeOnly": "Reports are available to owner and finance roles only.",

@@ -57,6 +57,9 @@ export function Sidebar() {
         <Link href="/billing" className={isActive('/billing') ? 'active' : ''}>
           {I.invoice} {t('billing')} <span className="lock">🔒</span>
         </Link>
+        <Link href="/payroll" className={isActive('/payroll') ? 'active' : ''}>
+          {I.cash} {t('payroll')} <span className="lock">🔒</span>
+        </Link>
         <Link href="/reports" className={isActive('/reports') ? 'active' : ''}>
           {I.report} {t('reports')} <span className="lock">🔒</span>
         </Link>
@@ -133,6 +136,12 @@ const I = {
     <>
       <path d="M6 2h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1Z" />
       <path d="M14 2v6h6" /><path d="M9 13h6M9 17h6M9 9h2" />
+    </>,
+  ),
+  cash: svg(
+    <>
+      <rect x="2" y="6" width="20" height="12" rx="2" /><circle cx="12" cy="12" r="2.5" />
+      <path d="M6 12h.01M18 12h.01" />
     </>,
   ),
   gear: svg(

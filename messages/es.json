@@ -36,6 +36,7 @@
     "draft": "Borrador",
     "confirmed": "Confirmado",
     "sent": "Enviada",
+    "approved": "Aprobada",
     "paid": "Pagada",
     "void": "Anulada"
   },
@@ -47,6 +48,7 @@
     "people": "Personal",
     "clientsPrices": "Clientes y precios",
     "billing": "Facturación",
+    "payroll": "Nómina",
     "reports": "Reportes",
     "settings": "Ajustes"
   },
@@ -247,6 +249,32 @@
     "truck": "Camión",
     "route": "Ruta",
     "charge": "Cobro"
+  },
+  "payroll": {
+    "financeOnly": "La nómina solo está disponible para dueño y finanzas.",
+    "newRun": "Nueva nómina",
+    "createRun": "Crear nómina",
+    "subtitle": "Pago de conductor y ayudante por viaje, sumado por período.",
+    "run": "Nómina",
+    "runs": "Nóminas",
+    "noRuns": "Aún no hay nóminas.",
+    "number": "Número",
+    "period": "Período",
+    "workers": "Personal",
+    "total": "Total",
+    "statusCol": "Estado",
+    "from": "Desde",
+    "to": "Hasta",
+    "noPayable": "No hay viajes sin pagar en este período.",
+    "willPay": "Se pagará a {count} personas",
+    "approve": "Aprobar",
+    "markPaid": "Marcar pagada",
+    "void": "Anular",
+    "confirmVoid": "¿Anular esta nómina? Dejará de contar y sus viajes quedan libres para volver a pagar.",
+    "worker": "Persona",
+    "driverPay": "Pago conductor",
+    "helperPay": "Pago ayudante",
+    "trips": "Viajes"
   },
   "reports": {
     "financeOnly": "Los reportes solo están disponibles para dueño y finanzas.",
