@@ -791,6 +791,94 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/treasury/accounts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List accounts with live balances */
+        get: operations["TreasuryController_listAccounts"];
+        put?: never;
+        /** Create an account */
+        post: operations["TreasuryController_createAccount"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/treasury/accounts/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete an empty account */
+        delete: operations["TreasuryController_removeAccount"];
+        options?: never;
+        head?: never;
+        /** Update an account (rename, opening balance, status) */
+        patch: operations["TreasuryController_updateAccount"];
+        trace?: never;
+    };
+    "/treasury/cash-position": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Balance per account + grand total */
+        get: operations["TreasuryController_cashPosition"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/treasury/transactions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List ledger transactions (filter account/category/range) */
+        get: operations["TreasuryController_listTransactions"];
+        put?: never;
+        /** Record a ledger transaction */
+        post: operations["TreasuryController_createTransaction"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/treasury/transactions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete a ledger transaction */
+        delete: operations["TreasuryController_removeTransaction"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1768,6 +1856,97 @@ export interface components {
             category: "maintenance" | "toll" | "insurance" | "tax" | "repair" | "other";
             /** @example 150 */
             amount: number;
+            note?: string;
+        };
+        AccountResponseDto: {
+            id: string;
+            name: string;
+            /** @enum {string} */
+            kind: "bank" | "cash";
+            openingBalance: string;
+            /** @description Current balance. */
+            balance: string;
+            /** @enum {string} */
+            status: "active" | "disabled";
+            /** Format: date-time */
+            createdAt: string;
+        };
+        CreateAccountDto: {
+            /** @example St Georges Bank */
+            name: string;
+            /**
+             * @default bank
+             * @enum {string}
+             */
+            kind: "bank" | "cash";
+            /**
+             * @description Starting balance.
+             * @example 0
+             */
+            openingBalance?: number;
+        };
+        UpdateAccountDto: {
+            /** @example St Georges Bank */
+            name?: string;
+            /**
+             * @default bank
+             * @enum {string}
+             */
+            kind: "bank" | "cash";
+            /**
+             * @description Starting balance.
+             * @example 0
+             */
+            openingBalance?: number;
+            /** @enum {string} */
+            status?: "active" | "disabled";
+        };
+        CashAccountDto: {
+            accountId: string;
+            name: string;
+            balance: string;
+        };
+        CashPositionResponseDto: {
+            accounts: components["schemas"]["CashAccountDto"][];
+            total: string;
+        };
+        TransactionResponseDto: {
+            id: string;
+            accountId: string;
+            accountName: string;
+            /** Format: date */
+            date: string;
+            /** @enum {string} */
+            direction: "inflow" | "outflow";
+            amount: string;
+            /** @enum {string} */
+            category: "client_payment" | "investment" | "loan" | "fuel" | "salary" | "maintenance" | "toll" | "insurance" | "tax" | "general" | "transfer" | "other";
+            description: string;
+            truckId?: Record<string, never> | null;
+            truckCode?: Record<string, never> | null;
+            note?: Record<string, never> | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        CreateTransactionDto: {
+            accountId: string;
+            /**
+             * Format: date
+             * @example 2026-05-10
+             */
+            date: string;
+            /** @enum {string} */
+            direction: "inflow" | "outflow";
+            /**
+             * @description Positive; direction signs it.
+             * @example 250
+             */
+            amount: number;
+            /** @enum {string} */
+            category: "client_payment" | "investment" | "loan" | "fuel" | "salary" | "maintenance" | "toll" | "insurance" | "tax" | "general" | "transfer" | "other";
+            description: string;
+            /** @description Optional truck allocation. */
+            truckId?: string;
             note?: string;
         };
     };
@@ -3658,6 +3837,233 @@ export interface operations {
         };
     };
     CostsController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Insufficient permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TreasuryController_listAccounts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountResponseDto"][];
+                };
+            };
+            /** @description Insufficient permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TreasuryController_createAccount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateAccountDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountResponseDto"];
+                };
+            };
+            /** @description Insufficient permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TreasuryController_removeAccount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Insufficient permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TreasuryController_updateAccount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateAccountDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountResponseDto"];
+                };
+            };
+            /** @description Insufficient permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TreasuryController_cashPosition: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashPositionResponseDto"];
+                };
+            };
+            /** @description Insufficient permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TreasuryController_listTransactions: {
+        parameters: {
+            query?: {
+                accountId?: string;
+                category?: "client_payment" | "investment" | "loan" | "fuel" | "salary" | "maintenance" | "toll" | "insurance" | "tax" | "general" | "transfer" | "other";
+                from?: string;
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TransactionResponseDto"][];
+                };
+            };
+            /** @description Insufficient permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TreasuryController_createTransaction: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateTransactionDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TransactionResponseDto"];
+                };
+            };
+            /** @description Insufficient permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TreasuryController_removeTransaction: {
         parameters: {
             query?: never;
             header?: never;
