@@ -1866,6 +1866,8 @@ export interface components {
             openingBalance: string;
             /** @description Current balance. */
             balance: string;
+            /** @description Auto-posted entries land here. */
+            isDefault: boolean;
             /** @enum {string} */
             status: "active" | "disabled";
             /** Format: date-time */
@@ -1900,6 +1902,8 @@ export interface components {
             openingBalance?: number;
             /** @enum {string} */
             status?: "active" | "disabled";
+            /** @description Make this the auto-post account. */
+            isDefault?: boolean;
         };
         CashAccountDto: {
             accountId: string;
@@ -1925,6 +1929,11 @@ export interface components {
             truckId?: Record<string, never> | null;
             truckCode?: Record<string, never> | null;
             note?: Record<string, never> | null;
+            /**
+             * @description manual or auto-posted source.
+             * @enum {string}
+             */
+            sourceType: "manual" | "invoice" | "payroll" | "cost";
             /** Format: date-time */
             createdAt: string;
         };

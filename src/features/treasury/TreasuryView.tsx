@@ -11,6 +11,7 @@ import { getTrucks } from '@/lib/api/masterdata';
 import {
   listAccounts,
   createAccount,
+  updateAccount,
   listTransactions,
   createTransaction,
   deleteTransaction,
@@ -31,8 +32,13 @@ export function TreasuryView() {
   const [addingTx, setAddingTx] = useState(false);
   const [addingAcct, setAddingAcct] = useState(false);
 
+  const qc = useQueryClient();
   const accounts = useQuery({ queryKey: ['accounts'], queryFn: listAccounts, enabled: !authLoading && canSeeMoney });
   const total = accounts.data?.reduce((s, a) => s + Number(a.balance), 0) ?? 0;
+  const setDefault = useMutation({
+    mutationFn: (id: string) => updateAccount(id, { isDefault: true }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['accounts'] }),
+  });
 
   if (authLoading) return <div className="page helper">…</div>;
   if (!canSeeMoney) {
@@ -57,9 +63,16 @@ export function TreasuryView() {
           {accounts.isLoading && <span className="helper">{tc('loading')}</span>}
           {accounts.data && accounts.data.length === 0 && <span className="helper">{t('noAccounts')}</span>}
           {accounts.data?.map((a) => (
-            <div key={a.id} style={{ minWidth: 180, border: '1px solid var(--line)', borderRadius: 'var(--rc)', padding: '12px 14px' }}>
+            <div key={a.id} style={{ minWidth: 190, border: a.isDefault ? '1px solid var(--blue)' : '1px solid var(--line)', borderRadius: 'var(--rc)', padding: '12px 14px' }}>
               <div className="muted" style={{ fontSize: 12, fontWeight: 600 }}>{a.name} <span className="pill off" style={{ marginLeft: 4 }}>{t(`kind_${a.kind}`)}</span></div>
               <div style={{ font: '800 19px var(--font)', marginTop: 4, color: Number(a.balance) < 0 ? 'var(--bad)' : 'var(--ink)' }}>{money(a.balance)}</div>
+              <div style={{ marginTop: 6 }}>
+                {a.isDefault ? (
+                  <span className="pill info" style={{ fontSize: 10 }}>★ {t('default')}</span>
+                ) : (
+                  <button className="linkbtn" style={{ fontSize: 11 }} disabled={setDefault.isPending} onClick={() => setDefault.mutate(a.id)}>{t('setDefault')}</button>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -113,7 +126,7 @@ function Ledger({ accountId }: { accountId: string }) {
                   <tr key={x.id}>
                     <td className="muted">{x.date.slice(0, 10)}</td>
                     <td>{x.accountName}</td>
-                    <td>{x.description}</td>
+                    <td>{x.description}{x.sourceType !== 'manual' && <span className="pill off" style={{ marginLeft: 6, fontSize: 10 }}>{t('auto')}</span>}</td>
                     <td className="muted">{t(`cat_${x.category}`)}</td>
                     <td className="muted">{x.truckCode ?? '—'}</td>
                     <td className="tnum" style={{ textAlign: 'right', fontWeight: 700, color: inflow ? 'var(--ok)' : 'var(--bad)' }}>

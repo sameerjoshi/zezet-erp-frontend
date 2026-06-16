@@ -16,12 +16,15 @@ export type TxCategory =
   | 'transfer'
   | 'other';
 
+export type TxSource = 'manual' | 'invoice' | 'payroll' | 'cost';
+
 export interface Account {
   id: string;
   name: string;
   kind: AccountKind;
   openingBalance: string;
   balance: string;
+  isDefault: boolean;
   status: 'active' | 'disabled' | 'inactive';
   createdAt: string;
 }
@@ -37,6 +40,7 @@ export interface Transaction {
   truckId: string | null;
   truckCode: string | null;
   note: string | null;
+  sourceType: TxSource;
   createdAt: string;
 }
 export interface CashPosition {
@@ -56,6 +60,8 @@ const qs = (o: Record<string, string | undefined>) => {
 export const listAccounts = () => apiFetch<Account[]>('/treasury/accounts');
 export const createAccount = (body: { name: string; kind?: AccountKind; openingBalance?: number }) =>
   apiFetch<Account>('/treasury/accounts', { method: 'POST', body: JSON.stringify(body) });
+export const updateAccount = (id: string, body: { isDefault?: boolean; name?: string; status?: string }) =>
+  apiFetch<Account>(`/treasury/accounts/${id}`, { method: 'PATCH', body: JSON.stringify(body) });
 export const deleteAccount = (id: string) =>
   apiFetch<void>(`/treasury/accounts/${id}`, { method: 'DELETE' });
 export const getCashPosition = () => apiFetch<CashPosition>('/treasury/cash-position');
