@@ -60,6 +60,9 @@ export function Sidebar() {
         <Link href="/payroll" className={isActive('/payroll') ? 'active' : ''}>
           {I.cash} {t('payroll')} <span className="lock">🔒</span>
         </Link>
+        <Link href="/costs" className={isActive('/costs') ? 'active' : ''}>
+          {I.wrench} {t('costs')} <span className="lock">🔒</span>
+        </Link>
         <Link href="/reports" className={isActive('/reports') ? 'active' : ''}>
           {I.report} {t('reports')} <span className="lock">🔒</span>
         </Link>
@@ -142,6 +145,11 @@ const I = {
     <>
       <rect x="2" y="6" width="20" height="12" rx="2" /><circle cx="12" cy="12" r="2.5" />
       <path d="M6 12h.01M18 12h.01" />
+    </>,
+  ),
+  wrench: svg(
+    <>
+      <path d="M14.7 6.3a4 4 0 0 1-5 5L4 17v3h3l5.7-5.7a4 4 0 0 0 5-5l-2.6 2.6-2.4-.6-.6-2.4Z" />
     </>,
   ),
   gear: svg(

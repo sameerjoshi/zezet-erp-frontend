@@ -580,6 +580,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/reports/truck-pnl": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Per-truck profit & loss (revenue − fuel − pay − costs) */
+        get: operations["ReportingController_truckPnl"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/reports/worker-pay": {
         parameters: {
             query?: never;
@@ -737,6 +754,41 @@ export interface paths {
         head?: never;
         /** Transition status (approve/paid/void) or edit notes */
         patch: operations["PayrollController_update"];
+        trace?: never;
+    };
+    "/truck-costs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List truck costs (filter by truck/date range) */
+        get: operations["CostsController_list"];
+        put?: never;
+        /** Record a truck cost */
+        post: operations["CostsController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/truck-costs/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete a truck cost */
+        delete: operations["CostsController_remove"];
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
 }
@@ -1443,6 +1495,33 @@ export interface components {
             totals: components["schemas"]["OperationalBucketDto"];
             perDay: components["schemas"]["OperationalDayDto"][];
         };
+        TruckPnlRowDto: {
+            truckId: string;
+            truckCode: string;
+            revenue: string;
+            fuel: string;
+            driverPay: string;
+            helperPay: string;
+            /** @description Other costs (maintenance, tolls, etc.). */
+            costs: string;
+            profit: string;
+        };
+        TruckPnlTotalsDto: {
+            revenue: string;
+            fuel: string;
+            driverPay: string;
+            helperPay: string;
+            costs: string;
+            profit: string;
+        };
+        TruckPnlResponseDto: {
+            /** Format: date */
+            from: string;
+            /** Format: date */
+            to: string;
+            perTruck: components["schemas"]["TruckPnlRowDto"][];
+            totals: components["schemas"]["TruckPnlTotalsDto"];
+        };
         WorkerPayDto: {
             workerId: string;
             workerName: string;
@@ -1664,6 +1743,32 @@ export interface components {
             /** @enum {string} */
             status?: "draft" | "approved" | "paid" | "void";
             notes?: string;
+        };
+        CostResponseDto: {
+            id: string;
+            truckId: string;
+            truckCode: string;
+            /** Format: date */
+            date: string;
+            /** @enum {string} */
+            category: "maintenance" | "toll" | "insurance" | "tax" | "repair" | "other";
+            amount: string;
+            note?: Record<string, never> | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        CreateCostDto: {
+            truckId: string;
+            /**
+             * Format: date
+             * @example 2026-05-10
+             */
+            date: string;
+            /** @enum {string} */
+            category: "maintenance" | "toll" | "insurance" | "tax" | "repair" | "other";
+            /** @example 150 */
+            amount: number;
+            note?: string;
         };
     };
     responses: never;
@@ -3020,6 +3125,37 @@ export interface operations {
             };
         };
     };
+    ReportingController_truckPnl: {
+        parameters: {
+            query?: {
+                /** @description Inclusive start date. Defaults to (to − 29 days). */
+                from?: string;
+                /** @description Inclusive end date. Defaults to today (UTC). */
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TruckPnlResponseDto"];
+                };
+            };
+            /** @description Insufficient permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     ReportingController_workerPay: {
         parameters: {
             query?: {
@@ -3450,6 +3586,93 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["PayrollRunDetailResponseDto"];
                 };
+            };
+            /** @description Insufficient permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CostsController_list: {
+        parameters: {
+            query?: {
+                /** @description Filter by truck. */
+                truckId?: string;
+                from?: string;
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CostResponseDto"][];
+                };
+            };
+            /** @description Insufficient permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CostsController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCostDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CostResponseDto"];
+                };
+            };
+            /** @description Insufficient permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CostsController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Insufficient permissions */
             403: {

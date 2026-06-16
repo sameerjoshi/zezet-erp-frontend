@@ -55,3 +55,22 @@ export const getClientBillables = (r: Range) =>
   apiFetch<ClientBillablesReport>(`/reports/client-billables${qs(r)}`);
 export const getOperational = (r: Range) =>
   apiFetch<OperationalReport>(`/reports/operational${qs(r)}`);
+
+export interface TruckPnlRow {
+  truckId: string;
+  truckCode: string;
+  revenue: string;
+  fuel: string;
+  driverPay: string;
+  helperPay: string;
+  costs: string;
+  profit: string;
+}
+export interface TruckPnlReport {
+  from: string;
+  to: string;
+  perTruck: TruckPnlRow[];
+  totals: Omit<TruckPnlRow, 'truckId' | 'truckCode'>;
+}
+export const getTruckPnl = (r: Range) =>
+  apiFetch<TruckPnlReport>(`/reports/truck-pnl${qs(r)}`);

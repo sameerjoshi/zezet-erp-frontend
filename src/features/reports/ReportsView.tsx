@@ -10,6 +10,7 @@ import {
   getOperational,
   getWorkerPay,
   getClientBillables,
+  getTruckPnl,
   type Range,
 } from '@/lib/api/reports';
 import { usePaged } from '@/lib/usePaged';
@@ -17,6 +18,7 @@ import { Pagination } from '@/components/Pagination';
 
 type Tab =
   | 'operational'
+  | 'pnl'
   | 'trips'
   | 'utilization'
   | 'workerPay'
@@ -49,6 +51,7 @@ export function ReportsView() {
   const range: Range = { from, to };
   const tabs: { key: Tab; label: string }[] = [
     { key: 'operational', label: t('tabOperational') },
+    { key: 'pnl', label: t('tabPnl') },
     { key: 'trips', label: t('tabTrips') },
     { key: 'utilization', label: t('tabUtilization') },
     { key: 'workerPay', label: t('tabWorkerPay') },
@@ -75,6 +78,7 @@ export function ReportsView() {
       </div>
 
       {tab === 'operational' && <OperationalPanel range={range} />}
+      {tab === 'pnl' && <PnlPanel range={range} />}
       {tab === 'trips' && <TripsPanel range={range} />}
       {tab === 'utilization' && <UtilizationPanel range={range} />}
       {tab === 'workerPay' && <WorkerPayPanel range={range} />}
@@ -94,6 +98,69 @@ function Panel({ title, children }: { title: string; children: React.ReactNode }
 function Empty() {
   const t = useTranslations('reports');
   return <div className="bd helper">{t('noData')}</div>;
+}
+
+const money = (s: string) => '$' + Number(s).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+function PnlPanel({ range }: { range: Range }) {
+  const t = useTranslations('reports');
+  const q = useQuery({ queryKey: ['rep-pnl', range], queryFn: () => getTruckPnl(range) });
+  const rows = q.data?.perTruck ?? [];
+  const pg = usePaged(rows, 20);
+  const tot = q.data?.totals;
+  return (
+    <Panel title={`${t('tabPnl')}${tot ? ` · ${money(tot.profit)} ${t('profit')}` : ''}`}>
+      {q.isLoading ? (
+        <div className="bd helper">…</div>
+      ) : rows.length === 0 ? (
+        <Empty />
+      ) : (
+        <>
+          <table>
+            <thead>
+              <tr>
+                <th>{t('truck')}</th>
+                <th style={{ textAlign: 'right' }}>{t('revenue')}</th>
+                <th style={{ textAlign: 'right' }}>{t('fuel')}</th>
+                <th style={{ textAlign: 'right' }}>{t('pay')}</th>
+                <th style={{ textAlign: 'right' }}>{t('costs')}</th>
+                <th style={{ textAlign: 'right' }}>{t('profit')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pg.pageItems.map((r) => {
+                const pay = (Number(r.driverPay) + Number(r.helperPay)).toFixed(2);
+                const neg = Number(r.profit) < 0;
+                return (
+                  <tr key={r.truckId}>
+                    <td><b>{r.truckCode}</b></td>
+                    <td className="tnum" style={{ textAlign: 'right' }}>{money(r.revenue)}</td>
+                    <td className="tnum" style={{ textAlign: 'right' }}>{money(r.fuel)}</td>
+                    <td className="tnum" style={{ textAlign: 'right' }}>{money(pay)}</td>
+                    <td className="tnum" style={{ textAlign: 'right' }}>{money(r.costs)}</td>
+                    <td className="tnum" style={{ textAlign: 'right', fontWeight: 700, color: neg ? 'var(--bad)' : 'var(--ok)' }}>{money(r.profit)}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+            {tot && (
+              <tfoot>
+                <tr style={{ borderTop: '2px solid var(--line-2)', fontWeight: 800 }}>
+                  <td>{t('total')}</td>
+                  <td className="tnum" style={{ textAlign: 'right' }}>{money(tot.revenue)}</td>
+                  <td className="tnum" style={{ textAlign: 'right' }}>{money(tot.fuel)}</td>
+                  <td className="tnum" style={{ textAlign: 'right' }}>{money((Number(tot.driverPay) + Number(tot.helperPay)).toFixed(2))}</td>
+                  <td className="tnum" style={{ textAlign: 'right' }}>{money(tot.costs)}</td>
+                  <td className="tnum" style={{ textAlign: 'right', color: Number(tot.profit) < 0 ? 'var(--bad)' : 'var(--ok)' }}>{money(tot.profit)}</td>
+                </tr>
+              </tfoot>
+            )}
+          </table>
+          <Pagination paged={pg} />
+        </>
+      )}
+    </Panel>
+  );
 }
 
 function OperationalPanel({ range }: { range: Range }) {
