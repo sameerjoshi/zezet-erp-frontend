@@ -5,6 +5,15 @@ Format per entry: **What changed · Decisions/deviations · Gotchas/risks · Nex
 
 ---
 
+## 2026-06-16 · Payroll UI
+**What changed**
+- New **Payroll** screen (`src/features/payroll/PayrollView.tsx`, route `/payroll`, finance-gated nav link, cash icon). List pay runs (status filter + pagination); create a run from a period with a live preview (worker count + total via `/payroll/preview`); run detail modal with per-worker statements (driver/helper/total/trips, paginated) + actions (approve / mark paid / void / delete draft).
+- `src/lib/api/payroll.ts` typed client; status pills (draft amber / approved blue / paid green / void grey); regenerated `schema.d.ts`; EN/ES + `nav.payroll`, `status.approved`.
+
+**Verified live:** PAY-2026-0001 May = 70 workers, $31,331.32; per-worker driver/helper split correct.
+
+**Next:** #3 per-truck P&L UI.
+
 ## 2026-06-16 · Billing / AR UI
 **What changed**
 - New **Billing** screen (`src/features/billing/BillingView.tsx`, route `/billing`, finance-gated nav link with lock). Invoices tab: list with status filter + pagination, click-through to a detail modal. Create modal: client select + from/to → live billable preview (count + total via `/invoices/billable`) → create; Create disabled when 0 billable. Detail modal: frozen line items + actions (mark sent / mark paid / void / delete draft). AR aging tab (current/30/60/90 per client + grand total).
