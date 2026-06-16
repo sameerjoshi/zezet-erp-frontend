@@ -614,6 +614,77 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/invoices/billable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Preview the trips billable for a client + period */
+        get: operations["BillingController_billable"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/invoices/aging": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** AR aging of outstanding (sent) invoices per client */
+        get: operations["BillingController_aging"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/invoices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List invoices (filter by status/client) */
+        get: operations["BillingController_list"];
+        put?: never;
+        /** Create a draft invoice from a client + period */
+        post: operations["BillingController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/invoices/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Invoice detail with its lines */
+        get: operations["BillingController_get"];
+        put?: never;
+        post?: never;
+        /** Delete a draft invoice */
+        delete: operations["BillingController_remove"];
+        options?: never;
+        head?: never;
+        /** Transition status (send/paid/void) or edit notes */
+        patch: operations["BillingController_update"];
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1349,6 +1420,121 @@ export interface components {
             /** Format: date */
             to: string;
             clients: components["schemas"]["ClientBillableDto"][];
+        };
+        BillableTripDto: {
+            tripId: string;
+            /** Format: date */
+            date: string;
+            truckCode: string;
+            routeLabel?: Record<string, never> | null;
+            billAmount: string;
+        };
+        BillablePreviewResponseDto: {
+            clientId: string;
+            /** Format: date */
+            from: string;
+            /** Format: date */
+            to: string;
+            trips: components["schemas"]["BillableTripDto"][];
+            tripCount: number;
+            total: string;
+        };
+        AgingClientDto: {
+            clientId: string;
+            clientName: string;
+            /** @description 0..30 days since issue. */
+            current: string;
+            /** @description 31..60 days. */
+            d30: string;
+            /** @description 61..90 days. */
+            d60: string;
+            /** @description 90+ days. */
+            d90: string;
+            total: string;
+        };
+        AgingResponseDto: {
+            clients: components["schemas"]["AgingClientDto"][];
+            grandTotal: string;
+        };
+        InvoiceResponseDto: {
+            id: string;
+            /** @example INV-2026-0001 */
+            number: string;
+            clientId: string;
+            clientName: string;
+            /** Format: date */
+            periodFrom: string;
+            /** Format: date */
+            periodTo: string;
+            /** @enum {string} */
+            status: "draft" | "sent" | "paid" | "void";
+            /** Format: date */
+            issueDate: string;
+            total: string;
+            amountPaid: string;
+            paidAt?: Record<string, never> | null;
+            notes?: Record<string, never> | null;
+            /** @description Number of billed lines. */
+            lineCount: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        InvoiceLineResponseDto: {
+            id: string;
+            /** @description Source trip (snapshot reference). */
+            tripId: string;
+            /** Format: date */
+            date: string;
+            truckCode: string;
+            routeLabel?: Record<string, never> | null;
+            billAmount: string;
+        };
+        InvoiceDetailResponseDto: {
+            id: string;
+            /** @example INV-2026-0001 */
+            number: string;
+            clientId: string;
+            clientName: string;
+            /** Format: date */
+            periodFrom: string;
+            /** Format: date */
+            periodTo: string;
+            /** @enum {string} */
+            status: "draft" | "sent" | "paid" | "void";
+            /** Format: date */
+            issueDate: string;
+            total: string;
+            amountPaid: string;
+            paidAt?: Record<string, never> | null;
+            notes?: Record<string, never> | null;
+            /** @description Number of billed lines. */
+            lineCount: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            lines: components["schemas"]["InvoiceLineResponseDto"][];
+        };
+        CreateInvoiceDto: {
+            clientId: string;
+            /**
+             * Format: date
+             * @example 2026-05-01
+             */
+            from: string;
+            /**
+             * Format: date
+             * @example 2026-05-31
+             */
+            to: string;
+            notes?: string;
+        };
+        UpdateInvoiceDto: {
+            /** @enum {string} */
+            status?: "draft" | "sent" | "paid" | "void";
+            notes?: string;
         };
     };
     responses: never;
@@ -2756,6 +2942,210 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ClientBillablesReportResponseDto"];
+                };
+            };
+            /** @description Insufficient permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    BillingController_billable: {
+        parameters: {
+            query: {
+                /** @description Client to bill. */
+                clientId: string;
+                from: string;
+                to: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BillablePreviewResponseDto"];
+                };
+            };
+            /** @description Insufficient permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    BillingController_aging: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgingResponseDto"];
+                };
+            };
+            /** @description Insufficient permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    BillingController_list: {
+        parameters: {
+            query?: {
+                /** @description Filter by status. */
+                status?: "draft" | "sent" | "paid" | "void";
+                /** @description Filter by client. */
+                clientId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceResponseDto"][];
+                };
+            };
+            /** @description Insufficient permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    BillingController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateInvoiceDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceDetailResponseDto"];
+                };
+            };
+            /** @description Insufficient permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    BillingController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceDetailResponseDto"];
+                };
+            };
+            /** @description Insufficient permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    BillingController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Insufficient permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    BillingController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateInvoiceDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceDetailResponseDto"];
                 };
             };
             /** @description Insufficient permissions */
