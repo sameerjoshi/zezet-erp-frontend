@@ -5,6 +5,16 @@ Format per entry: **What changed · Decisions/deviations · Gotchas/risks · Nex
 
 ---
 
+## 2026-06-16 · Costs entry + P&L report UI
+**What changed**
+- New **Costs** screen (`src/features/costs/CostsView.tsx`, route `/costs`, finance-gated nav, wrench icon): record per-truck costs (truck, date, category, amount, note) via a modal; list with truck filter + pagination + delete. `src/lib/api/costs.ts` typed client.
+- **Reports** gains a **Profit & loss** tab (`PnlPanel`): per-truck revenue / fuel / pay / costs / profit (profit green, red when negative) + a fleet totals footer row, via `/reports/truck-pnl`. `getTruckPnl` added to the reports client.
+- EN/ES (`nav.costs`, `costs.*`, `reports.tabPnl`/revenue/fuel/pay/costs/profit). Regenerated `schema.d.ts`.
+
+**Verified live:** $500 cost on Camión 1 shows in its P&L (profit $12,593); fleet May profit $111,126.31. Note: fuel column reads $0 until the import fuel-fix re-ingest (backend DEVLOG).
+
+**Next:** #4 Treasury / bank UI.
+
 ## 2026-06-16 · Payroll UI
 **What changed**
 - New **Payroll** screen (`src/features/payroll/PayrollView.tsx`, route `/payroll`, finance-gated nav link, cash icon). List pay runs (status filter + pagination); create a run from a period with a live preview (worker count + total via `/payroll/preview`); run detail modal with per-worker statements (driver/helper/total/trips, paginated) + actions (approve / mark paid / void / delete draft).
