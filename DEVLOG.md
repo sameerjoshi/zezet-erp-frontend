@@ -5,6 +5,14 @@ Format per entry: **What changed · Decisions/deviations · Gotchas/risks · Nex
 
 ---
 
+## 2026-06-16 · Treasury UI
+**What changed**
+- New **Treasury** screen (`src/features/treasury/TreasuryView.tsx`, route `/treasury`, finance-gated nav, bank icon): cash-position cards (live balance per account + total), add account; categorized transaction ledger (date / account / description / category / truck / signed amount — green inflow, red outflow) with account filter, add-transaction modal (account, direction, amount, category, description, optional truck), delete, pagination. `src/lib/api/treasury.ts` typed client; EN/ES.
+
+**Verified live:** St Georges Bank opening $100k + $5k client payment → $105k balance & cash position.
+
+**This completes #1–#4.** Next: end-of-scope data re-ingest + sanity check.
+
 ## 2026-06-16 · Costs entry + P&L report UI
 **What changed**
 - New **Costs** screen (`src/features/costs/CostsView.tsx`, route `/costs`, finance-gated nav, wrench icon): record per-truck costs (truck, date, category, amount, note) via a modal; list with truck filter + pagination + delete. `src/lib/api/costs.ts` typed client.
