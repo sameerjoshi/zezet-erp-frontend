@@ -5,6 +5,12 @@ Format per entry: **What changed · Decisions/deviations · Gotchas/risks · Nex
 
 ---
 
+## 2026-06-16 · Treasury auto-post UI
+**What changed**
+- Account cards show a **Default** badge (auto-posts land here) + a **Set as default** action; ledger rows tag auto-posted entries (invoice/payroll/cost) with an **Auto** pill. Added `isDefault`/`sourceType` to the typed client + `updateAccount`. EN/ES.
+
+**Verified live:** marking INV-2026-0001 paid auto-posted "INV-2026-0001 · TLA [Auto] · +112,238.57" to St Georges Bank. (Then wiped in the end-of-scope data reset.)
+
 ## 2026-06-16 · Treasury UI
 **What changed**
 - New **Treasury** screen (`src/features/treasury/TreasuryView.tsx`, route `/treasury`, finance-gated nav, bank icon): cash-position cards (live balance per account + total), add account; categorized transaction ledger (date / account / description / category / truck / signed amount — green inflow, red outflow) with account filter, add-transaction modal (account, direction, amount, category, description, optional truck), delete, pagination. `src/lib/api/treasury.ts` typed client; EN/ES.
