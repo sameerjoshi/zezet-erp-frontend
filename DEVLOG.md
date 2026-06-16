@@ -5,6 +5,15 @@ Format per entry: **What changed · Decisions/deviations · Gotchas/risks · Nex
 
 ---
 
+## 2026-06-16 · Billing / AR UI
+**What changed**
+- New **Billing** screen (`src/features/billing/BillingView.tsx`, route `/billing`, finance-gated nav link with lock). Invoices tab: list with status filter + pagination, click-through to a detail modal. Create modal: client select + from/to → live billable preview (count + total via `/invoices/billable`) → create; Create disabled when 0 billable. Detail modal: frozen line items + actions (mark sent / mark paid / void / delete draft). AR aging tab (current/30/60/90 per client + grand total).
+- `src/lib/api/billing.ts` typed client; status pills (draft amber / sent blue / paid green / void grey); regenerated `schema.d.ts`; EN/ES strings + `nav.billing`, status sent/paid/void, common.delete.
+
+**Verified live:** INV-2026-0001 TLA/May $112,238.57 (404 trips, matches dashboard); re-bill shows "no unbilled trips".
+
+**Next:** Payroll UI (#2).
+
 ## 2026-06-15 · Operational tracking UI (3-state status + operating %)
 **What changed**
 - **Enter Trips**: per-truck-day state control (`.seg`) Operating / No clients / Broken on the panel header, bound to `DailyLogDetail.operStatus` via `updateDailyLog`. Idle/broken hide the trips table and show a banner; adding a trip auto-marks the day operating; fuel/odo shown only when operating. Truck-rail dots now colour by state (broken=red, no-clients=amber, then confirmed/draft/none).
