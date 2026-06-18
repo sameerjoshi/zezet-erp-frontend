@@ -44,7 +44,7 @@ export function CostsView() {
   }
 
   return (
-    <div className="page" style={{ maxWidth: 1000 }}>
+    <div className="page">
       <div className="toolbar">
         <button className="btn" onClick={() => setAdding(true)}>+ {t('newCost')}</button>
         <select className="input" style={{ width: 200, marginLeft: 12 }} value={truckId} onChange={(e) => { setTruckId(e.target.value); pg.setPage(1); }}>

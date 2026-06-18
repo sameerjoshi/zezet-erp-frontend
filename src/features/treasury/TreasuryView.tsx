@@ -50,7 +50,7 @@ export function TreasuryView() {
   }
 
   return (
-    <div className="page" style={{ maxWidth: 1100 }}>
+    <div className="page">
       {/* Cash position */}
       <div className="card" style={{ marginBottom: 14 }}>
         <div className="hd">

@@ -37,7 +37,7 @@ export function PayrollView() {
   }
 
   return (
-    <div className="page" style={{ maxWidth: 1100 }}>
+    <div className="page">
       <div className="card" style={{ marginBottom: 14 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px' }}>
           <button className="btn" onClick={() => setCreating(true)}>+ {t('newRun')}</button>

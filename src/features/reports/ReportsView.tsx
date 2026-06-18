@@ -59,7 +59,7 @@ export function ReportsView() {
   ];
 
   return (
-    <div className="page" style={{ maxWidth: 1000 }}>
+    <div className="page">
       <div className="card" style={{ marginBottom: 14 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', flexWrap: 'wrap' }}>
           <span className="helper" style={{ fontWeight: 700 }}>{t('from')}</span>

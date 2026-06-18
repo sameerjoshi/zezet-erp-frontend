@@ -40,7 +40,7 @@ export function BillingView() {
   }
 
   return (
-    <div className="page" style={{ maxWidth: 1100 }}>
+    <div className="page">
       <div className="card" style={{ marginBottom: 14 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', flexWrap: 'wrap' }}>
           <button className="btn" onClick={() => setCreating(true)}>+ {t('newInvoice')}</button>
